@@ -144,7 +144,22 @@ img {
 .desktop-nav > a,
 .nav-trigger {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 12px 0;
+}
+
+.nav-caret {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2.4;
+  transition: transform 180ms ease;
+}
+
+.nav-item:hover .nav-caret,
+.nav-item:focus-within .nav-caret {
+  transform: rotate(180deg);
 }
 
 .desktop-nav > a::after,
@@ -304,12 +319,19 @@ img {
 
 .dropdown-card:hover,
 .dropdown-card:focus-visible,
+.dropdown-card.is-active,
 .compact-dropdown a:hover,
-.compact-dropdown a:focus-visible {
+.compact-dropdown a:focus-visible,
+.compact-dropdown a.is-active {
   transform: translateY(-2px);
   background: var(--white);
   border-color: rgba(28, 75, 66, 0.2);
   outline: 0;
+}
+
+.dropdown-card.is-active,
+.compact-dropdown a.is-active {
+  box-shadow: inset 0 0 0 1px var(--lime);
 }
 
 .dropdown-card svg {
@@ -2758,21 +2780,72 @@ img {
 
   .mobile-menu.is-open {
     display: grid;
+    gap: 8px;
   }
 
-  .mobile-menu a {
-    padding: 14px 6px;
+  .mobile-primary-link,
+  .mobile-submenu-toggle,
+  .mobile-submenu-panel a {
+    width: 100%;
+    padding: 14px;
+    text-align: left;
     color: var(--green);
-    border-bottom: 1px solid rgba(28, 75, 66, 0.08);
+    background: var(--cream);
+    border: 1px solid rgba(28, 75, 66, 0.08);
+    border-radius: var(--radius-md);
     font-weight: 600;
   }
 
-  .mobile-menu a:last-child {
-    border-bottom: 0;
+  .mobile-submenu {
+    display: grid;
+    gap: 0;
   }
 
-  .mobile-menu a.is-active {
+  .mobile-submenu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+  }
+
+  .mobile-submenu-toggle svg {
+    width: 18px;
+    height: 18px;
+    transition: transform 180ms ease;
+  }
+
+  .mobile-submenu.is-open .mobile-submenu-toggle svg {
+    transform: rotate(180deg);
+  }
+
+  .mobile-submenu-panel {
+    display: grid;
+    max-height: 0;
+    overflow: hidden;
+    gap: 6px;
+    padding: 0 8px;
+    transition:
+      max-height 240ms ease,
+      padding 240ms ease;
+  }
+
+  .mobile-submenu.is-open .mobile-submenu-panel {
+    max-height: 720px;
+    padding: 8px;
+  }
+
+  .mobile-submenu-panel a {
+    padding: 12px 14px;
+    background: var(--white);
+    font-size: 14px;
+  }
+
+  .mobile-primary-link.is-active,
+  .mobile-submenu-toggle.is-active,
+  .mobile-submenu-panel a.is-active {
     color: var(--lime-2);
+    border-color: rgba(146, 194, 0, 0.34);
+    background: rgba(180, 231, 23, 0.12);
   }
 
   .asset-strip,

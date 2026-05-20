@@ -5,6 +5,7 @@ import {
   ArrowUpRight,
   Asterisk,
   BarChart3,
+  ChevronDown,
   CheckCircle2,
   CircleDot,
   Download,
@@ -800,7 +801,27 @@ function Header({
   menuOpen: boolean
   setMenuOpen: (value: boolean) => void
 }) {
-  const mobileLinks = [...primaryNav, ...companyNav, ...resourceNav, ...legalNav]
+  const [openMobileGroup, setOpenMobileGroup] = useState<string | null>(null)
+  const activeMobileGroup = navIsActive(activePage, 'services')
+    ? 'solutions'
+    : companyNav.some((item) => item.key === activePage)
+      ? 'company'
+      : resourceNav.some((item) => item.key === activePage)
+        ? 'resources'
+        : legalNav.some((item) => item.key === activePage)
+          ? 'legal'
+          : null
+  const visibleMobileGroup = openMobileGroup ?? activeMobileGroup
+  const solutionLinks = coreServices.map((service) => ({
+    key: servicePath(service),
+    label: service.title,
+  }))
+  const mobileGroups = [
+    { key: 'solutions', label: 'Solutions', links: solutionLinks },
+    { key: 'company', label: 'Company', links: companyNav },
+    { key: 'resources', label: 'Resources', links: resourceNav },
+    { key: 'legal', label: 'Legal', links: legalNav },
+  ]
 
   return (
     <header className="site-header">
@@ -819,6 +840,7 @@ function Header({
               <div className="nav-item has-dropdown" key={item.key}>
                 <a className={`nav-trigger ${activeClass}`} href={pageHref(item.key)}>
                   {item.label}
+                  <ChevronDown className="nav-caret" aria-hidden="true" />
                 </a>
                 <div className="dropdown-panel solutions-dropdown">
                   <div className="dropdown-intro">
@@ -833,7 +855,11 @@ function Header({
                     {coreServices.map((service) => {
                       const Icon = service.icon
                       return (
-                        <a className="dropdown-card" href={pageHref(servicePath(service))} key={service.title}>
+                        <a
+                          className={`dropdown-card ${activePage === servicePath(service) ? 'is-active' : ''}`}
+                          href={pageHref(servicePath(service))}
+                          key={service.title}
+                        >
                           <Icon aria-hidden="true" />
                           <span>{service.title}</span>
                           <small>{service.description}</small>
@@ -851,6 +877,7 @@ function Header({
               <div className="nav-item has-dropdown" key={item.key}>
                 <a className={`nav-trigger ${activeClass}`} href={pageHref(item.key)}>
                   {item.label}
+                  <ChevronDown className="nav-caret" aria-hidden="true" />
                 </a>
                 <div className="dropdown-panel compact-dropdown">
                   {companyNav.map((link) => (
@@ -869,6 +896,7 @@ function Header({
               <div className="nav-item has-dropdown" key={item.key}>
                 <a className={`nav-trigger ${activeClass}`} href={pageHref(item.key)}>
                   {item.label}
+                  <ChevronDown className="nav-caret" aria-hidden="true" />
                 </a>
                 <div className="dropdown-panel compact-dropdown">
                   {resourceNav.map((link) => (
@@ -899,7 +927,13 @@ function Header({
         <button
           className="mobile-toggle"
           type="button"
-          onClick={() => setMenuOpen(!menuOpen)}
+          onClick={() => {
+            const nextMenuState = !menuOpen
+            setMenuOpen(nextMenuState)
+            if (nextMenuState) {
+              setOpenMobileGroup(null)
+            }
+          }}
           aria-label={menuOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={menuOpen}
         >
@@ -907,16 +941,59 @@ function Header({
         </button>
       </div>
       <div className={`mobile-menu ${menuOpen ? 'is-open' : ''}`}>
-        {mobileLinks.map((item) => (
-          <a
-            className={navIsActive(activePage, item.key) ? 'is-active' : ''}
-            href={pageHref(item.key)}
-            key={`${item.key}-${item.label}`}
-            onClick={() => setMenuOpen(false)}
-          >
-            {item.label}
-          </a>
-        ))}
+        <a
+          className={`mobile-primary-link ${navIsActive(activePage, 'home') ? 'is-active' : ''}`}
+          href={pageHref('home')}
+          onClick={() => setMenuOpen(false)}
+        >
+          Home
+        </a>
+        {mobileGroups.map((group) => {
+          const isOpen = visibleMobileGroup === group.key
+          const groupActive =
+            (group.key === 'solutions' && navIsActive(activePage, 'services')) ||
+            group.links.some((link) => navIsActive(activePage, link.key))
+
+          return (
+            <div className={`mobile-submenu ${isOpen ? 'is-open' : ''}`} key={group.key}>
+              <button
+                className={`mobile-submenu-toggle ${groupActive ? 'is-active' : ''}`}
+                type="button"
+                onClick={() => setOpenMobileGroup(isOpen ? '' : group.key)}
+                aria-expanded={isOpen}
+              >
+                {group.label}
+                <ChevronDown aria-hidden="true" />
+              </button>
+              <div className="mobile-submenu-panel">
+                {group.links.map((link) => (
+                  <a
+                    className={navIsActive(activePage, link.key) ? 'is-active' : ''}
+                    href={pageHref(link.key)}
+                    key={`${group.key}-${link.key}`}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )
+        })}
+        <a
+          className={`mobile-primary-link ${navIsActive(activePage, 'team') ? 'is-active' : ''}`}
+          href={pageHref('team')}
+          onClick={() => setMenuOpen(false)}
+        >
+          Team
+        </a>
+        <a
+          className={`mobile-primary-link ${navIsActive(activePage, 'contact') ? 'is-active' : ''}`}
+          href={pageHref('contact')}
+          onClick={() => setMenuOpen(false)}
+        >
+          Contact
+        </a>
       </div>
     </header>
   )
