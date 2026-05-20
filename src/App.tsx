@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { ChangeEvent, Dispatch, FormEvent, ReactNode, SetStateAction } from 'react'
+import { motion, useReducedMotion, useScroll } from 'framer-motion'
 import {
   ArrowUpRight,
   Asterisk,
@@ -79,10 +80,12 @@ type BlogDraft = {
 }
 
 const customInsightsStorageKey = 'closing-gap-custom-insights-v1'
+const allowedUploadTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+const maxStoredImageSize = 1_600_000
 
 const primaryNav: PageLink[] = [
   { key: 'home', label: 'Home' },
-  { key: 'services', label: 'Services' },
+  { key: 'services', label: 'Solutions' },
   { key: 'about', label: 'About' },
   { key: 'team', label: 'Team' },
   { key: 'insights', label: 'Insights' },
@@ -105,7 +108,6 @@ const resourceNav: PageLink[] = [
   { key: 'industries', label: 'Industries Served' },
   { key: 'ebooks', label: 'Ebooks' },
   { key: 'faqs', label: 'FAQs' },
-  { key: 'admin', label: 'Admin CMS' },
 ]
 
 const legalNav: PageLink[] = [
@@ -126,7 +128,7 @@ const partnerLogos = [
 const coreServices = [
   {
     title: 'Global Outsourcing',
-    description: 'Managed overseas delivery capacity for operations, support, and project execution.',
+    description: 'Global delivery capacity for operations, support, and project execution.',
     detail:
       'Build reliable offshore capacity with role planning, delivery governance, onboarding support, and a practical operating rhythm.',
     image: images.serviceTwo,
@@ -136,7 +138,7 @@ const coreServices = [
   },
   {
     title: 'Development & Testing',
-    description: 'Web, cloud, app, QA, security, and performance support for reliable digital builds.',
+    description: 'Web, cloud, app, QA, security, and performance support for reliable digital products.',
     detail:
       'Plan, build, test, and release digital products with engineering support that keeps quality visible throughout the project.',
     image: images.serviceThree,
@@ -146,7 +148,7 @@ const coreServices = [
   },
   {
     title: 'Digital Marketing',
-    description: 'SEO, paid media, content, analytics, and performance campaigns built around ROI.',
+    description: 'SEO, paid media, content, analytics, and performance campaigns connected to revenue.',
     detail:
       'Turn visibility into qualified demand with search, paid campaigns, content, social execution, and reporting that supports decisions.',
     image: images.serviceFour,
@@ -156,7 +158,7 @@ const coreServices = [
   },
   {
     title: 'Business Automation',
-    description: 'CRM, workflow, lead routing, and messaging automation that reduces manual work.',
+    description: 'CRM, workflow, lead routing, and messaging automation that reduces manual drag.',
     detail:
       'Connect forms, messages, CRMs, follow-ups, reports, and internal workflows so repeated work moves without constant manual effort.',
     image: images.serviceOne,
@@ -186,7 +188,7 @@ const coreServices = [
   },
   {
     title: 'Startup & SMB Services',
-    description: 'Lean growth support for founders who need execution capacity without heavy overhead.',
+    description: 'Lean 360-degree support for founders who need execution capacity without heavy overhead.',
     detail:
       'Give startups and SMBs access to flexible growth support across marketing, operations, hiring, automation, and technical delivery.',
     image: images.blogOne,
@@ -196,7 +198,7 @@ const coreServices = [
   },
   {
     title: 'Technology Solutions',
-    description: 'Integrated systems using Zoho, Power Platform, dashboards, and connected tools.',
+    description: 'Integrated business systems using Zoho, Power Platform, dashboards, and connected tools.',
     detail:
       'Design practical business systems with connected tools, dashboards, automations, and integrations that match daily workflows.',
     image: images.metric,
@@ -216,7 +218,7 @@ const coreServices = [
   },
   {
     title: 'Business Consulting',
-    description: 'Execution strategy, process design, governance, and operating rhythm advisory.',
+    description: '360° strategy, process design, governance, and operating rhythm advisory.',
     detail:
       'Clarify priorities, build a workable plan, define ownership, and improve execution rhythm across teams and functions.',
     image: images.advisor,
@@ -233,7 +235,7 @@ const values = [
   },
   {
     title: 'Client Focus',
-    text: 'Your goals shape the team, systems, timelines, and growth strategy we build.',
+    text: 'Your goals shape the team, systems, timelines, and 360° growth strategy we build.',
   },
   {
     title: 'Risk Resilience',
@@ -261,7 +263,7 @@ const process = [
   {
     step: '02',
     title: 'Design',
-    text: 'We shape the right mix of talent, outsourcing, automation, marketing, and delivery.',
+    text: 'We shape the right mix of talent, outsourcing, automation, marketing, technology, and delivery.',
   },
   {
     step: '03',
@@ -544,8 +546,51 @@ function isBlogPost(value: unknown): value is BlogPost {
     typeof post.description === 'string' &&
     typeof post.image === 'string' &&
     Array.isArray(post.sections) &&
-    post.sections.every((section) => typeof section === 'string')
+      post.sections.every((section) => typeof section === 'string')
   )
+}
+
+function cleanText(value: string, limit = 240) {
+  return Array.from(value)
+    .filter((character) => {
+      const code = character.charCodeAt(0)
+      return code >= 32 && code !== 127
+    })
+    .join('')
+    .trim()
+    .slice(0, limit)
+}
+
+function isSafeBlogImage(image: string) {
+  return (
+    image.startsWith(imageBase) ||
+    image.startsWith('/assets/') ||
+    allowedUploadTypes.some((type) => image.startsWith(`data:${type};base64,`))
+  )
+}
+
+function normalizeBlogPost(post: BlogPost): BlogPost | null {
+  const title = cleanText(post.title, 110)
+  const description = cleanText(post.description, 220)
+  const tag = cleanText(post.tag || 'Insight', 32)
+  const sections = post.sections
+    .map((section) => cleanText(section, 1200))
+    .filter(Boolean)
+    .slice(0, 8)
+
+  if (!title || !description || sections.length === 0) {
+    return null
+  }
+
+  return {
+    id: cleanText(post.id, 72) || `custom-${Date.now().toString(36)}`,
+    tag,
+    title,
+    description,
+    image: isSafeBlogImage(post.image) ? post.image : images.blogOne,
+    sections,
+    featured: Boolean(post.featured),
+  }
 }
 
 function readCustomInsights(): BlogPost[] {
@@ -560,7 +605,9 @@ function readCustomInsights(): BlogPost[] {
     }
 
     const parsed = JSON.parse(stored)
-    return Array.isArray(parsed) ? parsed.filter(isBlogPost) : []
+    return Array.isArray(parsed)
+      ? parsed.filter(isBlogPost).map(normalizeBlogPost).filter((post): post is BlogPost => Boolean(post))
+      : []
   } catch {
     return []
   }
@@ -618,6 +665,8 @@ function App() {
   const [customInsights, setCustomInsights] = useState<BlogPost[]>(() => readCustomInsights())
   const insights = getInsights(customInsights)
   const [activePage, setActivePage] = useState<PageKey>(() => getRouteFromHash(insights))
+  const { scrollYProgress } = useScroll()
+  const prefersReducedMotion = useReducedMotion()
 
   useEffect(() => {
     const syncRoute = () => {
@@ -640,11 +689,21 @@ function App() {
 
   return (
     <div className="site-shell">
+      <motion.div
+        className="scroll-progress"
+        style={{ scaleX: prefersReducedMotion ? 0 : scrollYProgress }}
+        aria-hidden="true"
+      />
       <Header activePage={activePage} menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
-      <main>
+      <motion.main
+        key={activePage}
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
+        animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+        transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+      >
         {renderPage(activePage, activeFaq, setActiveFaq, insights, customInsights, setCustomInsights)}
         <SiteFooter />
-      </main>
+      </motion.main>
     </div>
   )
 }
@@ -716,6 +775,22 @@ function renderPage(
   }
 }
 
+function RevealSection({ className, children }: { className: string; children: ReactNode }) {
+  const prefersReducedMotion = useReducedMotion()
+
+  return (
+    <motion.section
+      className={className}
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 28 }}
+      whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.18 }}
+      transition={{ duration: 0.56, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {children}
+    </motion.section>
+  )
+}
+
 function Header({
   activePage,
   menuOpen,
@@ -736,15 +811,83 @@ function Header({
         <span>Closing Gap</span>
       </a>
       <nav className="desktop-nav" aria-label="Primary navigation">
-        {primaryNav.map((item) => (
-          <a
-            className={navIsActive(activePage, item.key) ? 'is-active' : ''}
-            href={pageHref(item.key)}
-            key={item.key}
-          >
-            {item.label}
-          </a>
-        ))}
+        {primaryNav.map((item) => {
+          const activeClass = navIsActive(activePage, item.key) ? 'is-active' : ''
+
+          if (item.key === 'services') {
+            return (
+              <div className="nav-item has-dropdown" key={item.key}>
+                <a className={`nav-trigger ${activeClass}`} href={pageHref(item.key)}>
+                  {item.label}
+                </a>
+                <div className="dropdown-panel solutions-dropdown">
+                  <div className="dropdown-intro">
+                    <span>360° solutions</span>
+                    <strong>One connected plan for growth</strong>
+                    <p>Talent, outsourcing, marketing, technology, automation, consulting, and training in one operating model.</p>
+                    <a href={pageHref('services')}>
+                      View all solutions <ArrowUpRight aria-hidden="true" />
+                    </a>
+                  </div>
+                  <div className="dropdown-grid">
+                    {coreServices.map((service) => {
+                      const Icon = service.icon
+                      return (
+                        <a className="dropdown-card" href={pageHref(servicePath(service))} key={service.title}>
+                          <Icon aria-hidden="true" />
+                          <span>{service.title}</span>
+                          <small>{service.description}</small>
+                        </a>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            )
+          }
+
+          if (item.key === 'about') {
+            return (
+              <div className="nav-item has-dropdown" key={item.key}>
+                <a className={`nav-trigger ${activeClass}`} href={pageHref(item.key)}>
+                  {item.label}
+                </a>
+                <div className="dropdown-panel compact-dropdown">
+                  {companyNav.map((link) => (
+                    <a className={navIsActive(activePage, link.key) ? 'is-active' : ''} href={pageHref(link.key)} key={link.key}>
+                      {link.label}
+                      <ArrowUpRight aria-hidden="true" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )
+          }
+
+          if (item.key === 'insights') {
+            return (
+              <div className="nav-item has-dropdown" key={item.key}>
+                <a className={`nav-trigger ${activeClass}`} href={pageHref(item.key)}>
+                  {item.label}
+                </a>
+                <div className="dropdown-panel compact-dropdown">
+                  {resourceNav.map((link) => (
+                    <a className={navIsActive(activePage, link.key) ? 'is-active' : ''} href={pageHref(link.key)} key={link.key}>
+                      {link.label}
+                      <ArrowUpRight aria-hidden="true" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )
+          }
+
+          return (
+            <a className={activeClass} href={pageHref(item.key)} key={item.key}>
+              {item.label}
+            </a>
+          )
+        })}
       </nav>
       <div className="header-actions">
         <a className="round-control" href={pageHref('insights')} aria-label="Search insights">
@@ -807,27 +950,27 @@ function HomePage({
 
 function Hero() {
   return (
-    <section className="hero">
+    <RevealSection className="hero">
       <div className="hero-top section-shell">
         <h1>
-          Your All in One <span>Growth Partner</span>
+          360° Business Solutions <span>for Growing Companies</span>
         </h1>
         <div className="hero-actions">
           <a className="button button-dark" href={pageHref('contact')}>
-            Let's get started
+            Start Your 360° Plan
           </a>
-          <a className="icon-button" href={pageHref('contact')} aria-label="Book a growth call">
+          <a className="icon-button" href={pageHref('contact')} aria-label="Book a 360 degree growth call">
             <ArrowUpRight aria-hidden="true" />
           </a>
           <a className="button button-light" href={pageHref('services')}>
-            Explore Services
+            Explore Solutions
           </a>
         </div>
       </div>
       <img className="hero-photo" src={images.hero} alt="Consultants reviewing a growth plan" />
       <div className="asset-strip section-shell" aria-label="Closing Gap performance highlights">
         <article className="asset-card asset-title">
-          <h2>Growth</h2>
+          <h2>360° Support</h2>
           <a href={pageHref('services')}>
             Learn more <ArrowUpRight aria-hidden="true" />
           </a>
@@ -851,17 +994,17 @@ function Hero() {
           <strong>30+</strong>
         </article>
       </div>
-    </section>
+    </RevealSection>
   )
 }
 
 function WhoWeAre() {
   return (
-    <section className="intro-section section-shell">
+    <RevealSection className="intro-section section-shell">
       <div>
         <p className="pill-label">Who we are</p>
         <h2>
-          Founded to Close the Gaps that Continue to <span>Slow Growth.</span>
+          One partner to close the gaps across your <span>entire business.</span>
         </h2>
         <div className="intro-buttons">
           <a className="button button-dark" href={pageHref('about')}>
@@ -881,21 +1024,21 @@ function WhoWeAre() {
           ))}
         </div>
         <p>
-          We are a team of specialists helping businesses access talent, build smarter
-          systems, launch stronger marketing, and operate with less friction.
+          Closing Gap is a 360° business solutions company helping teams access talent,
+          improve operations, build digital systems, market smarter, and scale with less friction.
         </p>
       </div>
-    </section>
+    </RevealSection>
   )
 }
 
 function ServicesPanel() {
   return (
-    <section className="services-panel section-shell">
+    <RevealSection className="services-panel section-shell">
       <div className="panel-head">
-        <p className="pill-label">Services</p>
+        <p className="pill-label">360° solutions</p>
         <h2>
-          Covering the Full Spectrum of <span>Business Growth</span> Services
+          A connected system for <span>business growth</span>, delivery, and scale
         </h2>
         <a className="button button-light" href={pageHref('services')}>
           View all
@@ -919,16 +1062,16 @@ function ServicesPanel() {
           )
         })}
       </div>
-    </section>
+    </RevealSection>
   )
 }
 
 function Values() {
   return (
-    <section className="values-section section-shell">
+    <RevealSection className="values-section section-shell">
       <p className="pill-label">Our values</p>
       <h2>
-        We Listen, <span>Think Independently,</span> Advise & Take Action
+        We Listen, <span>Think End-to-End,</span> Advise & Take Action
       </h2>
       <div className="value-grid">
         {values.map((value, index) => (
@@ -941,37 +1084,37 @@ function Values() {
           </article>
         ))}
       </div>
-    </section>
+    </RevealSection>
   )
 }
 
 function PhotoCta() {
   return (
-    <section className="photo-cta">
+    <RevealSection className="photo-cta">
       <img src={images.cta} alt="Consultants planning business growth" />
       <div className="floating-card">
         <p className="pill-label">Why us?</p>
         <Asterisk aria-hidden="true" />
         <h2>
-          You'll Know What <span>Builds Growth</span>
+          You Get One System for <span>Every Growth Gap</span>
         </h2>
-        <p>Transparent teams. Practical systems. No gimmicks.</p>
+        <p>Talent, technology, marketing, automation, and operations working as one plan.</p>
         <a className="button button-dark" href={pageHref('contact')}>
           Schedule a Call
         </a>
       </div>
-    </section>
+    </RevealSection>
   )
 }
 
 function TeamPreview() {
   return (
-    <section className="team-section section-shell">
+    <RevealSection className="team-section section-shell">
       <div className="section-row">
         <div>
           <p className="pill-label">Our team</p>
           <h2>
-            Choosing <span>The Right</span> Growth Planning Team
+            Choosing <span>The Right</span> 360° Delivery Team
           </h2>
         </div>
         <a className="button button-dark" href={pageHref('team')}>
@@ -980,7 +1123,7 @@ function TeamPreview() {
       </div>
       <TeamCards />
       <StatsRow />
-    </section>
+    </RevealSection>
   )
 }
 
@@ -1018,7 +1161,7 @@ function StatsRow() {
 
 function TrustBlock() {
   return (
-    <section className="trust-section section-shell">
+    <RevealSection className="trust-section section-shell">
       <div className="trust-image">
         <img src={images.advisor} alt="Advisory meeting" />
         <div className="cert-card">
@@ -1028,10 +1171,10 @@ function TrustBlock() {
       </div>
       <article className="trust-card">
         <p className="pill-label">Trusted partner</p>
-        <h2>Execution Support Across Talent, Tech, and Growth</h2>
+        <h2>A 360° partner across talent, tech, marketing, and operations</h2>
         <p>
-          We help you build confidence across the full growth journey, from finding the
-          right people to automating the systems that keep work moving.
+          We help you build confidence across the full business journey, from finding
+          the right people to automating the systems that keep work moving.
         </p>
         <div className="paired-buttons">
           <a className="button button-dark" href={pageHref('contact')}>
@@ -1042,17 +1185,17 @@ function TrustBlock() {
           </a>
         </div>
       </article>
-    </section>
+    </RevealSection>
   )
 }
 
 function Testimonials() {
   return (
-    <section className="testimonial-section section-shell">
+    <RevealSection className="testimonial-section section-shell">
       <div className="testimonial-copy">
         <p className="pill-label">Testimonials</p>
         <h2>
-          Client <span>Experiences</span> That Speak for Themselves
+          Client <span>Outcomes</span> Across the Business
         </h2>
         <div className="review-row">
           <a className="button button-dark" href={pageHref('case-studies')}>
@@ -1084,7 +1227,7 @@ function Testimonials() {
         </div>
       </article>
       <PartnerLogoRow />
-    </section>
+    </RevealSection>
   )
 }
 
@@ -1100,13 +1243,13 @@ function PartnerLogoRow() {
 
 function InsightsPreview({ insights }: { insights: BlogPost[] }) {
   return (
-    <section className="insights-section">
+    <RevealSection className="insights-section">
       <div className="section-shell">
         <div className="section-row">
           <div>
             <p className="pill-label">Insights</p>
             <h2>
-              Hear <span>Directly</span> From Growth Experts
+              Practical <span>360° Growth</span> Thinking
             </h2>
           </div>
           <a className="button button-dark" href={pageHref('insights')}>
@@ -1115,7 +1258,7 @@ function InsightsPreview({ insights }: { insights: BlogPost[] }) {
         </div>
         <InsightCards insights={insights} />
       </div>
-    </section>
+    </RevealSection>
   )
 }
 
@@ -1147,11 +1290,11 @@ function FaqSection({
   compact?: boolean
 }) {
   return (
-    <section className={`faq-section section-shell ${compact ? 'compact-section' : ''}`}>
+    <RevealSection className={`faq-section section-shell ${compact ? 'compact-section' : ''}`}>
       <div className="faq-intro">
         <p className="pill-label">FAQ</p>
-        <h2>Growth Support FAQs</h2>
-        <p>Common questions on hiring, outsourcing, automation, marketing, and delivery.</p>
+        <h2>360° Business Support FAQs</h2>
+        <p>Common questions on hiring, outsourcing, automation, marketing, technology, and delivery.</p>
         <a className="button button-dark" href={pageHref('faqs')}>
           View All FAQs
         </a>
@@ -1172,16 +1315,16 @@ function FaqSection({
           </button>
         ))}
       </div>
-    </section>
+    </RevealSection>
   )
 }
 
 function Newsletter() {
   return (
-    <section className="newsletter">
+    <RevealSection className="newsletter">
       <div className="newsletter-copy">
         <Asterisk aria-hidden="true" />
-        <h2>Latest News & Resources</h2>
+        <h2>Latest 360° Growth Resources</h2>
         <form
           onSubmit={(event) => {
             event.preventDefault()
@@ -1192,7 +1335,7 @@ function Newsletter() {
         </form>
       </div>
       <img src={images.newsletter} alt="Business advisory meeting" />
-    </section>
+    </RevealSection>
   )
 }
 
@@ -1200,16 +1343,16 @@ function ServicesPage() {
   return (
     <>
       <PageHero
-        kicker="Services"
+        kicker="360° solutions"
         image={images.serviceThree}
         title={
           <>
-            Growth Services That Close <span>Execution Gaps</span>
+            Business Solutions That Close <span>Execution Gaps</span>
           </>
         }
-        copy="Talent, outsourcing, technology, marketing, automation, and consulting support arranged as one practical growth system."
+        copy="Talent, outsourcing, technology, marketing, automation, consulting, and training support arranged as one practical 360° growth system."
       />
-      <section className="directory-section section-shell">
+      <RevealSection className="directory-section section-shell">
         <div className="directory-grid">
           {coreServices.map((service) => {
             const Icon = service.icon
@@ -1237,7 +1380,7 @@ function ServicesPage() {
             )
           })}
         </div>
-      </section>
+      </RevealSection>
       <ProcessBand />
       <Newsletter />
     </>
@@ -1250,16 +1393,16 @@ function ServiceDetailPage({ service }: { service: (typeof coreServices)[number]
   return (
     <>
       <PageHero
-        kicker="Service"
+        kicker="360° solution"
         image={service.image}
         title={
           <>
-            {service.title} <span>Designed for Growth</span>
+            {service.title} <span>Built Into a 360° Plan</span>
           </>
         }
         copy={service.detail}
       />
-      <section className="detail-section section-shell">
+      <RevealSection className="detail-section section-shell">
         <article className="detail-lead">
           <Icon aria-hidden="true" />
           <h2>What this service helps you improve</h2>
@@ -1274,15 +1417,15 @@ function ServiceDetailPage({ service }: { service: (typeof coreServices)[number]
             </article>
           ))}
         </div>
-      </section>
-      <section className="outcome-section section-shell">
+      </RevealSection>
+      <RevealSection className="outcome-section section-shell">
         <p className="pill-label">Expected outcomes</p>
         <div className="outcome-grid">
           {service.outcomes.map((outcome) => (
             <span key={outcome}>{outcome}</span>
           ))}
         </div>
-      </section>
+      </RevealSection>
       <ProcessBand />
     </>
   )
@@ -1296,16 +1439,16 @@ function AboutPage() {
         image={images.advisor}
         title={
           <>
-            A Practical Partner for <span>Sustainable Growth</span>
+            A 360° Partner for <span>Sustainable Growth</span>
           </>
         }
-        copy="Closing Gap brings talent, technology, operations, marketing, and automation support together so growing businesses can execute with more confidence."
+        copy="Closing Gap brings talent, technology, operations, marketing, automation, and advisory support together so growing businesses can execute with more confidence."
       />
-      <section className="story-section section-shell">
+      <RevealSection className="story-section section-shell">
         <div className="story-copy">
           <p className="pill-label">Mission and goals</p>
           <h2>
-            Clear goals, measurable execution, and <span>less operational drag.</span>
+            Clear goals, connected execution, and <span>less operational drag.</span>
           </h2>
         </div>
         <div className="story-cards">
@@ -1314,7 +1457,7 @@ function AboutPage() {
             <h3>Mission</h3>
             <p>
               To close critical execution gaps across talent, operations, marketing, and
-              technology with scalable and affordable solutions.
+              technology with scalable, affordable, and connected 360° solutions.
             </p>
           </article>
           <article>
@@ -1322,7 +1465,7 @@ function AboutPage() {
             <h3>Vision</h3>
             <p>
               A world where ambitious businesses can access strong talent, smart systems,
-              and proven growth strategy without unnecessary complexity.
+              proven growth strategy, and operating support without unnecessary complexity.
             </p>
           </article>
           <article>
@@ -1334,7 +1477,7 @@ function AboutPage() {
             </p>
           </article>
         </div>
-      </section>
+      </RevealSection>
       <Values />
       <TrustBlock />
     </>
@@ -1349,15 +1492,15 @@ function TeamPage() {
         image={images.cta}
         title={
           <>
-            Specialists Built Around <span>Your Growth Plan</span>
+            Specialists Built Around <span>Your 360° Plan</span>
           </>
         }
-        copy="A blended team model for strategy, staffing, delivery, automation, marketing, and operations."
+        copy="A blended team model for strategy, staffing, delivery, automation, marketing, technology, and operations."
       />
-      <section className="team-section section-shell page-spaced">
+      <RevealSection className="team-section section-shell page-spaced">
         <TeamCards />
         <StatsRow />
-      </section>
+      </RevealSection>
       <TrustBlock />
     </>
   )
@@ -1371,16 +1514,16 @@ function InsightsPage({ insights }: { insights: BlogPost[] }) {
         image={images.blogOne}
         title={
           <>
-            Practical Thinking for <span>Growing Teams</span>
+            Practical Thinking for <span>360° Growth Teams</span>
           </>
         }
-        copy="Notes on hiring, automation, outsourcing, digital marketing, product delivery, and operating with less friction."
+        copy="Notes on hiring, automation, outsourcing, digital marketing, product delivery, operations, and scaling with less friction."
       />
-      <section className="insights-section page-insights">
+      <RevealSection className="insights-section page-insights">
         <div className="section-shell">
           <InsightCards insights={insights} />
         </div>
-      </section>
+      </RevealSection>
       <Newsletter />
     </>
   )
@@ -1395,14 +1538,14 @@ function ArticleDetailPage({ article }: { article: BlogPost }) {
         title={<>{article.title}</>}
         copy={article.description}
       />
-      <section className="article-section section-shell">
+      <RevealSection className="article-section section-shell">
         {article.sections.map((section, index) => (
           <article key={section}>
             <span>{String(index + 1).padStart(2, '0')}</span>
             <p>{section}</p>
           </article>
         ))}
-      </section>
+      </RevealSection>
       <Newsletter />
     </>
   )
@@ -1416,12 +1559,12 @@ function CaseStudiesPage() {
         image={images.newsletter}
         title={
           <>
-            Real Growth Problems, <span>Cleaner Execution</span>
+            Real Business Problems, <span>Cleaner Execution</span>
           </>
         }
-        copy="Representative examples of how Closing Gap can help businesses improve capability, speed, and operational clarity."
+        copy="Representative examples of how Closing Gap can help businesses improve capability, speed, marketing performance, operations, and delivery clarity."
       />
-      <section className="case-section section-shell">
+      <RevealSection className="case-section section-shell">
         {caseStudies.map((study) => (
           <article className="case-card" key={study.title}>
             <img src={study.image} alt="" />
@@ -1435,7 +1578,7 @@ function CaseStudiesPage() {
             </div>
           </article>
         ))}
-      </section>
+      </RevealSection>
     </>
   )
 }
@@ -1449,7 +1592,7 @@ function CaseStudyDetailPage({ study }: { study: (typeof caseStudies)[number] })
         title={<>{study.title}</>}
         copy={study.description}
       />
-      <section className="story-section section-shell">
+      <RevealSection className="story-section section-shell">
         <div className="story-copy">
           <p className="pill-label">Result</p>
           <h2>{study.metric}</h2>
@@ -1471,7 +1614,7 @@ function CaseStudyDetailPage({ study }: { study: (typeof caseStudies)[number] })
             <p>{study.result}</p>
           </article>
         </div>
-      </section>
+      </RevealSection>
     </>
   )
 }
@@ -1484,12 +1627,12 @@ function OurWorksPage() {
         image={images.blogThree}
         title={
           <>
-            Selected Work Across <span>Growth Systems</span>
+            Selected Work Across <span>360° Growth Systems</span>
           </>
         }
-        copy="A portfolio-style view of practical work across automation, hiring, marketing, operations, and delivery."
+        copy="A portfolio-style view of practical work across automation, hiring, marketing, technology, operations, and delivery."
       />
-      <section className="listing-section section-shell">
+      <RevealSection className="listing-section section-shell">
         <div className="listing-grid">
           {works.map((work) => (
             <article className="listing-card" key={work.title}>
@@ -1500,7 +1643,7 @@ function OurWorksPage() {
             </article>
           ))}
         </div>
-      </section>
+      </RevealSection>
     </>
   )
 }
@@ -1513,12 +1656,12 @@ function IndustriesPage() {
         image={images.cta}
         title={
           <>
-            Support for Teams Across <span>Multiple Industries</span>
+            360° Support Across <span>Multiple Industries</span>
           </>
         }
-        copy="Closing Gap adapts talent, technology, automation, and marketing support to the operating realities of each sector."
+        copy="Closing Gap adapts talent, technology, automation, marketing, consulting, and operations support to the realities of each sector."
       />
-      <section className="industry-section section-shell">
+      <RevealSection className="industry-section section-shell">
         {industries.map((industry, index) => (
           <article key={industry}>
             <span>{String(index + 1).padStart(2, '0')}</span>
@@ -1526,7 +1669,7 @@ function IndustriesPage() {
             <p>Flexible execution support for teams that need better capacity, clearer workflows, and measurable growth.</p>
           </article>
         ))}
-      </section>
+      </RevealSection>
     </>
   )
 }
@@ -1539,12 +1682,12 @@ function EbooksPage() {
         image={images.report}
         title={
           <>
-            Practical Guides for <span>Growth Operators</span>
+            Practical Guides for <span>360° Growth Operators</span>
           </>
         }
-        copy="Downloadable planning resources for leaders improving hiring, automation, outsourcing, and execution."
+        copy="Downloadable planning resources for leaders improving hiring, automation, outsourcing, marketing, operations, and execution."
       />
-      <section className="listing-section section-shell">
+      <RevealSection className="listing-section section-shell">
         <div className="listing-grid">
           {ebooks.map((ebook) => (
             <article className="listing-card ebook-card" key={ebook.title}>
@@ -1558,7 +1701,7 @@ function EbooksPage() {
             </article>
           ))}
         </div>
-      </section>
+      </RevealSection>
     </>
   )
 }
@@ -1580,7 +1723,7 @@ function FaqPage({
             Answers Before We <span>Start the Work</span>
           </>
         }
-        copy="A clearer view of how we approach hiring, outsourcing, automation, consulting, and delivery."
+        copy="A clearer view of how we approach hiring, outsourcing, automation, consulting, marketing, technology, and delivery."
       />
       <FaqSection activeFaq={activeFaq} setActiveFaq={setActiveFaq} />
     </>
@@ -1595,12 +1738,12 @@ function ContactPage() {
         image={images.hero}
         title={
           <>
-            Ready to Close the Gap in <span>Your Business?</span>
+            Ready to Build Your <span>360° Growth System?</span>
           </>
         }
-        copy="Share the outcome you want, and we will help shape the right first step."
+        copy="Share the outcome you want, and we will help shape the right first step across talent, technology, marketing, automation, and operations."
       />
-      <section className="contact-page section-shell">
+      <RevealSection className="contact-page section-shell">
         <div className="contact-panel">
           <h2>Book Your Free Consultation</h2>
           <p>Tell us what you need. We will route the conversation to the right team.</p>
@@ -1630,7 +1773,7 @@ function ContactPage() {
             <span>Pattom, Trivandrum - 695003</span>
           </ContactTile>
         </div>
-      </section>
+      </RevealSection>
     </>
   )
 }
@@ -1663,12 +1806,12 @@ function AdminPage({
       return
     }
 
-    if (!file.type.startsWith('image/')) {
-      setStatus('Choose an image file')
+    if (!allowedUploadTypes.includes(file.type)) {
+      setStatus('Choose a JPG, PNG, WebP, or GIF image')
       return
     }
 
-    if (file.size > 1_600_000) {
+    if (file.size > maxStoredImageSize) {
       setStatus('Use an image under 1.6 MB for browser storage')
       return
     }
@@ -1685,13 +1828,14 @@ function AdminPage({
   const publishPost = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    const title = draft.title.trim()
-    const tag = draft.tag.trim() || 'Insight'
-    const description = draft.description.trim()
+    const title = cleanText(draft.title, 110)
+    const tag = cleanText(draft.tag, 32) || 'Insight'
+    const description = cleanText(draft.description, 220)
     const sections = draft.sectionsText
       .split(/\n\s*\n/)
-      .map((section) => section.trim())
+      .map((section) => cleanText(section, 1200))
       .filter(Boolean)
+      .slice(0, 8)
 
     if (!title || !description || sections.length === 0) {
       setStatus('Add title, summary, and body copy')
@@ -1711,7 +1855,7 @@ function AdminPage({
       tag,
       title,
       description,
-      image: draft.image || images.blogOne,
+      image: isSafeBlogImage(draft.image) ? draft.image : images.blogOne,
       sections,
     }
 
@@ -1764,7 +1908,9 @@ function AdminPage({
     reader.onload = () => {
       try {
         const parsed = JSON.parse(String(reader.result || '[]'))
-        const incoming = Array.isArray(parsed) ? parsed.filter(isBlogPost) : []
+        const incoming = Array.isArray(parsed)
+          ? parsed.filter(isBlogPost).map(normalizeBlogPost).filter((post): post is BlogPost => Boolean(post))
+          : []
         const usedSlugs = new Set(getInsights(customInsights).map((post) => slugify(post.title)))
         const freshPosts = incoming.filter((post) => !usedSlugs.has(slugify(post.title)))
 
@@ -1789,12 +1935,12 @@ function AdminPage({
         image={draft.image || images.report}
         title={
           <>
-            Publish Blog Posts With <span>Images</span>
+            Publish 360° Growth Insights With <span>Images</span>
           </>
         }
-        copy="Create, edit, export, and publish Closing Gap insights directly into the site preview."
+        copy="Create, edit, export, and publish Closing Gap insights directly into this browser-based site preview."
       />
-      <section className="admin-page section-shell">
+      <RevealSection className="admin-page section-shell">
         <form className="admin-form" onSubmit={publishPost}>
           <div className="admin-form-head">
             <p className="pill-label">{editingId ? 'Editing post' : 'New post'}</p>
@@ -1838,7 +1984,7 @@ function AdminPage({
             <label>
               <ImagePlus aria-hidden="true" />
               Upload image
-              <input accept="image/*" onChange={handleImageUpload} type="file" />
+              <input accept="image/png,image/jpeg,image/webp,image/gif" onChange={handleImageUpload} type="file" />
             </label>
             {draft.image ? <img src={draft.image} alt="" /> : <span>Image preview</span>}
           </div>
@@ -1895,7 +2041,7 @@ function AdminPage({
             )}
           </div>
         </aside>
-      </section>
+      </RevealSection>
     </>
   )
 }
@@ -1908,12 +2054,12 @@ function ClientsPartnersPage() {
         image={images.hero}
         title={
           <>
-            Together Toward <span>Greater Growth</span>
+            Together Toward <span>360° Growth</span>
           </>
         }
-        copy="A relationship-led approach to client delivery, partner collaboration, and long-term execution support."
+        copy="A relationship-led approach to client delivery, partner collaboration, and long-term business execution support."
       />
-      <section className="partner-page section-shell">
+      <RevealSection className="partner-page section-shell">
         <div className="partner-panel">
           <h2>Trusted delivery relationships</h2>
           <p>
@@ -1923,7 +2069,7 @@ function ClientsPartnersPage() {
           <StatsRow />
         </div>
         <PartnerLogoRow />
-      </section>
+      </RevealSection>
       <Testimonials />
     </>
   )
@@ -1940,9 +2086,9 @@ function CareersPage() {
             Build Meaningful Work With <span>Closing Gap</span>
           </>
         }
-        copy="Join a team focused on practical growth, measurable execution, and better opportunities for businesses and professionals."
+        copy="Join a team focused on practical 360° business solutions, measurable execution, and better opportunities for businesses and professionals."
       />
-      <section className="listing-section section-shell">
+      <RevealSection className="listing-section section-shell">
         <div className="career-intro">
           <p className="pill-label">Open roles</p>
           <h2>Roles we are preparing to hire for</h2>
@@ -1958,7 +2104,7 @@ function CareersPage() {
             </article>
           ))}
         </div>
-      </section>
+      </RevealSection>
     </>
   )
 }
@@ -1974,7 +2120,7 @@ function CsrPage() {
             Growth Should Create <span>Opportunity</span>
           </>
         }
-        copy="Our social responsibility approach focuses on skill access, community support, and responsible business development."
+        copy="Our social responsibility approach focuses on skill access, community support, and responsible 360° business development."
       />
       <CardBand cards={csrCards} />
     </>
@@ -1992,7 +2138,7 @@ function EsgPage() {
             Responsible Operations for <span>Long-Term Trust</span>
           </>
         }
-        copy="Environmental, social, and governance thinking helps us build a more accountable growth partner."
+        copy="Environmental, social, and governance thinking helps us build a more accountable 360° business solutions partner."
       />
       <CardBand cards={esgCards} />
     </>
@@ -2001,7 +2147,7 @@ function EsgPage() {
 
 function CardBand({ cards }: { cards: { title: string; text: string }[] }) {
   return (
-    <section className="card-band section-shell">
+    <RevealSection className="card-band section-shell">
       {cards.map((card, index) => (
         <article key={card.title}>
           <span>{String(index + 1).padStart(2, '0')}</span>
@@ -2009,7 +2155,7 @@ function CardBand({ cards }: { cards: { title: string; text: string }[] }) {
           <p>{card.text}</p>
         </article>
       ))}
-    </section>
+    </RevealSection>
   )
 }
 
@@ -2063,7 +2209,7 @@ function CookiePolicyPage() {
 
 function NotFoundPage() {
   return (
-    <section className="not-found section-shell">
+    <RevealSection className="not-found section-shell">
       <p className="pill-label">404</p>
       <h1>
         This page is not in the <span>growth plan.</span>
@@ -2072,7 +2218,7 @@ function NotFoundPage() {
       <a className="button button-dark" href={pageHref('home')}>
         Back to Home
       </a>
-    </section>
+    </RevealSection>
   )
 }
 
@@ -2088,7 +2234,7 @@ function PageHero({
   image: string
 }) {
   return (
-    <section className="page-hero section-shell">
+    <RevealSection className="page-hero section-shell">
       <div className="page-hero-copy">
         <p className="pill-label">{kicker}</p>
         <h1>{title}</h1>
@@ -2103,16 +2249,16 @@ function PageHero({
         </div>
       </div>
       <img src={image} alt="" />
-    </section>
+    </RevealSection>
   )
 }
 
 function ProcessBand() {
   return (
-    <section className="process-band section-shell">
+    <RevealSection className="process-band section-shell">
       <div>
         <p className="pill-label">How it works</p>
-        <h2>Simple stages, serious follow-through.</h2>
+        <h2>Simple stages, serious 360° follow-through.</h2>
       </div>
       <div className="process-grid">
         {process.map((item) => (
@@ -2123,7 +2269,7 @@ function ProcessBand() {
           </article>
         ))}
       </div>
-    </section>
+    </RevealSection>
   )
 }
 
@@ -2157,7 +2303,7 @@ function LegalPage({
   sections: [string, string][]
 }) {
   return (
-    <section className="legal-page section-shell">
+    <RevealSection className="legal-page section-shell">
       <p className="pill-label">{kicker}</p>
       <h1>{title}</h1>
       <p className="legal-intro">{intro}</p>
@@ -2169,7 +2315,7 @@ function LegalPage({
           </article>
         ))}
       </div>
-    </section>
+    </RevealSection>
   )
 }
 
@@ -2191,9 +2337,9 @@ function SiteFooter() {
       <div className="footer-grid">
         <div>
           <h2>
-            Ready to <span>Close the Gap</span> in your Business?
+            Ready to Build a <span>360° Growth System</span>?
           </h2>
-          <p>We look forward to learning about your goals.</p>
+          <p>We look forward to learning what your business needs next.</p>
           <div className="paired-buttons">
             <a className="button button-dark" href="tel:+919074294791">
               Free Consultation
