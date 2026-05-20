@@ -24,3 +24,5 @@ qa/
 *.njsproj
 *.sln
 *.sw?
+
+.vercel
