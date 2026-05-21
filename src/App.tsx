@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { ChangeEvent, Dispatch, FormEvent, ReactNode, SetStateAction } from 'react'
-import { motion, useReducedMotion, useScroll } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion, useScroll } from 'framer-motion'
 import {
   ArrowUpRight,
   Asterisk,
@@ -81,6 +81,7 @@ type BlogDraft = {
 }
 
 const customInsightsStorageKey = 'closing-gap-custom-insights-v1'
+const introLoaderStorageKey = 'closing-gap-intro-seen-v1'
 const allowedUploadTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 const maxStoredImageSize = 1_600_000
 
@@ -675,12 +676,21 @@ function navIsActive(activePage: PageKey, navKey: PageKey) {
   return activePage === navKey
 }
 
+function shouldShowIntroLoader() {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  return window.sessionStorage.getItem(introLoaderStorageKey) !== 'seen'
+}
+
 function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [activeFaq, setActiveFaq] = useState(0)
   const [customInsights, setCustomInsights] = useState<BlogPost[]>(() => readCustomInsights())
   const insights = getInsights(customInsights)
   const [activePage, setActivePage] = useState<PageKey>(() => getRouteFromHash(insights))
+  const [showIntro, setShowIntro] = useState(() => shouldShowIntroLoader())
   const { scrollYProgress } = useScroll()
   const prefersReducedMotion = useReducedMotion()
 
@@ -703,8 +713,25 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'auto' })
   }, [activePage])
 
+  useEffect(() => {
+    if (!showIntro || typeof window === 'undefined') {
+      return
+    }
+
+    const timer = window.setTimeout(
+      () => {
+        window.sessionStorage.setItem(introLoaderStorageKey, 'seen')
+        setShowIntro(false)
+      },
+      prefersReducedMotion ? 700 : 2350,
+    )
+
+    return () => window.clearTimeout(timer)
+  }, [prefersReducedMotion, showIntro])
+
   return (
     <div className="site-shell">
+      <AnimatePresence>{showIntro ? <IntroLoader /> : null}</AnimatePresence>
       <motion.div
         className="scroll-progress"
         style={{ scaleX: prefersReducedMotion ? 0 : scrollYProgress }}
@@ -789,6 +816,74 @@ function renderPage(
     default:
       return <HomePage activeFaq={activeFaq} setActiveFaq={setActiveFaq} insights={insights} />
   }
+}
+
+function IntroLoader() {
+  const prefersReducedMotion = useReducedMotion()
+  const loaderLines = [
+    { width: '74%', start: -42 },
+    { width: '54%', start: 34 },
+    { width: '82%', start: -26 },
+    { width: '62%', start: 48 },
+  ]
+
+  return (
+    <motion.div
+      className="intro-loader"
+      role="status"
+      aria-label="Closing Gap 360 degree business solutions is loading"
+      initial={prefersReducedMotion ? false : { opacity: 1 }}
+      exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, filter: 'blur(12px)' }}
+      transition={{ duration: prefersReducedMotion ? 0.18 : 0.46, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <div className="intro-loader-stage">
+        <motion.div
+          className="intro-loader-mark"
+          initial={prefersReducedMotion ? false : { scale: 0.94, opacity: 0 }}
+          animate={prefersReducedMotion ? undefined : { scale: 1, opacity: 1 }}
+          transition={{ duration: 0.44, ease: [0.22, 1, 0.36, 1] }}
+          aria-hidden="true"
+        >
+          <motion.span
+            className="intro-loader-ring"
+            initial={prefersReducedMotion ? false : { rotate: -16, scale: 0.86, opacity: 0 }}
+            animate={prefersReducedMotion ? undefined : { rotate: 0, scale: 1, opacity: 1 }}
+            transition={{ delay: 0.28, duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
+          />
+          <span className="intro-loader-lines">
+            {loaderLines.map((line, index) => (
+              <motion.span
+                key={`${line.width}-${line.start}`}
+                style={{ width: line.width }}
+                initial={prefersReducedMotion ? false : { x: line.start, opacity: 0, scaleX: 0.28 }}
+                animate={prefersReducedMotion ? undefined : { x: 0, opacity: 1, scaleX: 1 }}
+                transition={{
+                  delay: 0.26 + index * 0.12,
+                  duration: 0.56,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+              />
+            ))}
+          </span>
+          <motion.span
+            className="intro-loader-sweep"
+            initial={prefersReducedMotion ? false : { x: '-140%', opacity: 0 }}
+            animate={prefersReducedMotion ? undefined : { x: '140%', opacity: [0, 1, 0] }}
+            transition={{ delay: 0.92, duration: 0.82, ease: [0.22, 1, 0.36, 1] }}
+          />
+        </motion.div>
+        <motion.div
+          className="intro-loader-copy"
+          initial={prefersReducedMotion ? false : { y: 18, opacity: 0 }}
+          animate={prefersReducedMotion ? undefined : { y: 0, opacity: 1 }}
+          transition={{ delay: 1.08, duration: 0.46, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <strong>Closing Gap</strong>
+          <span>360° Business Solutions</span>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
 }
 
 function RevealSection({ className, children }: { className: string; children: ReactNode }) {
