@@ -80,8 +80,23 @@ type BlogDraft = {
   image: string
 }
 
+type ContactFormData = {
+  name: string
+  email: string
+  phone: string
+  service: string
+  message: string
+  website: string
+}
+
+type ContactFormStatus = 'idle' | 'sending' | 'success' | 'error'
+
 const customInsightsStorageKey = 'closing-gap-custom-insights-v1'
 const introLoaderStorageKey = 'closing-gap-intro-seen-v1'
+const contactFormEndpoint = 'https://formsubmit.co/ajax/info@theclosinggap.net'
+const contactFormFallbackEndpoint = 'https://formsubmit.co/info@theclosinggap.net'
+const contactFormSubject = 'New Closing Gap 360 Consultation Request'
+const contactSpamBlacklist = 'casino,betting,viagra,pharma,crypto,loan,forex,adult'
 const allowedUploadTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 const maxStoredImageSize = 1_600_000
 
@@ -335,6 +350,15 @@ const emptyBlogDraft: BlogDraft = {
   description: '',
   sectionsText: '',
   image: '',
+}
+
+const emptyContactForm: ContactFormData = {
+  name: '',
+  email: '',
+  phone: '',
+  service: '',
+  message: '',
+  website: '',
 }
 
 const defaultInsights: BlogPost[] = [
@@ -682,6 +706,14 @@ function shouldShowIntroLoader() {
   }
 
   return window.sessionStorage.getItem(introLoaderStorageKey) !== 'seen'
+}
+
+function getContactNextUrl() {
+  if (typeof window === 'undefined') {
+    return 'https://theclosinggap.net/#/contact'
+  }
+
+  return `${window.location.origin}${window.location.pathname}#/contact`
 }
 
 function App() {
@@ -1918,6 +1950,93 @@ function FaqPage({
 }
 
 function ContactPage() {
+  const [formData, setFormData] = useState<ContactFormData>(emptyContactForm)
+  const [formStatus, setFormStatus] = useState<ContactFormStatus>('idle')
+  const [formMessage, setFormMessage] = useState('')
+  const formIsSending = formStatus === 'sending'
+
+  const updateContactField = (field: keyof ContactFormData, value: string) => {
+    setFormData((current) => ({ ...current, [field]: value }))
+    if (formStatus !== 'idle') {
+      setFormStatus('idle')
+      setFormMessage('')
+    }
+  }
+
+  const submitContactForm = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const formElement = event.currentTarget
+    const payload = {
+      name: cleanText(formData.name, 90),
+      email: cleanText(formData.email, 120).toLowerCase(),
+      phone: cleanText(formData.phone, 32),
+      service: cleanText(formData.service, 80),
+      message: cleanText(formData.message, 1500),
+    }
+
+    if (formData.website.trim()) {
+      setFormStatus('success')
+      setFormMessage('Thanks. Your request has been received.')
+      setFormData(emptyContactForm)
+      return
+    }
+
+    if (!payload.name || !payload.email || !payload.phone || !payload.service || !payload.message) {
+      setFormStatus('error')
+      setFormMessage('Please add your name, email, phone number, service, and message.')
+      return
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email)) {
+      setFormStatus('error')
+      setFormMessage('Please enter a valid email address.')
+      return
+    }
+
+    const phoneDigits = payload.phone.replace(/\D/g, '')
+    if (phoneDigits.length < 7 || phoneDigits.length > 15) {
+      setFormStatus('error')
+      setFormMessage('Please enter a valid phone number with country code if possible.')
+      return
+    }
+
+    const submission = new FormData()
+    submission.append('Name', payload.name)
+    submission.append('Email', payload.email)
+    submission.append('Phone', payload.phone)
+    submission.append('Service', payload.service)
+    submission.append('Message', payload.message)
+    submission.append('_subject', contactFormSubject)
+    submission.append('_replyto', payload.email)
+    submission.append('_template', 'table')
+    submission.append('_captcha', 'false')
+    submission.append('_honey', '')
+    submission.append('_blacklist', contactSpamBlacklist)
+
+    setFormStatus('sending')
+    setFormMessage('Sending your request...')
+
+    try {
+      const response = await fetch(contactFormEndpoint, {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body: submission,
+      })
+
+      if (!response.ok) {
+        throw new Error('Contact request failed')
+      }
+
+      setFormStatus('success')
+      setFormMessage('Thanks. Your request has been sent to info@theclosinggap.net.')
+      setFormData(emptyContactForm)
+    } catch {
+      setFormMessage('Opening secure fallback submission...')
+      window.setTimeout(() => formElement.submit(), 0)
+    }
+  }
+
   return (
     <>
       <PageHero
@@ -1935,15 +2054,93 @@ function ContactPage() {
           <h2>Book Your Free Consultation</h2>
           <p>Tell us what you need. We will route the conversation to the right team.</p>
           <form
-            onSubmit={(event) => {
-              event.preventDefault()
-            }}
+            action={contactFormFallbackEndpoint}
+            method="POST"
+            noValidate
+            onSubmit={submitContactForm}
           >
-            <input aria-label="Name" placeholder="Name" />
-            <input aria-label="Email" placeholder="Email" type="email" />
-            <input aria-label="Service" placeholder="Service needed" />
-            <button className="button button-dark" type="submit">
-              Submit
+            <input type="hidden" name="_subject" value={contactFormSubject} />
+            <input type="hidden" name="_template" value="table" />
+            <input type="hidden" name="_captcha" value="false" />
+            <input type="hidden" name="_blacklist" value={contactSpamBlacklist} />
+            <input type="hidden" name="_next" value={getContactNextUrl()} />
+            <input type="hidden" name="_replyto" value={formData.email} />
+            <input
+              className="form-honeypot"
+              name="_honey"
+              tabIndex={-1}
+              autoComplete="off"
+              value={formData.website}
+              onChange={(event) => updateContactField('website', event.target.value)}
+              aria-hidden="true"
+            />
+            <div className="contact-form-grid">
+              <input
+                aria-label="Name"
+                name="Name"
+                placeholder="Name"
+                value={formData.name}
+                onChange={(event) => updateContactField('name', event.target.value)}
+                autoComplete="name"
+                maxLength={90}
+                required
+              />
+              <input
+                aria-label="Email"
+                name="Email"
+                placeholder="Email"
+                type="email"
+                value={formData.email}
+                onChange={(event) => updateContactField('email', event.target.value)}
+                autoComplete="email"
+                maxLength={120}
+                required
+              />
+              <input
+                aria-label="Phone number"
+                name="Phone"
+                placeholder="Phone number"
+                type="tel"
+                value={formData.phone}
+                onChange={(event) => updateContactField('phone', event.target.value)}
+                autoComplete="tel"
+                inputMode="tel"
+                maxLength={32}
+                required
+              />
+              <select
+                aria-label="Service needed"
+                name="Service"
+                value={formData.service}
+                onChange={(event) => updateContactField('service', event.target.value)}
+                required
+              >
+                <option value="" disabled>
+                  Choose service
+                </option>
+                {coreServices.map((service) => (
+                  <option value={service.title} key={service.title}>
+                    {service.title}
+                  </option>
+                ))}
+              </select>
+              <textarea
+                className="full-field"
+                aria-label="Message"
+                name="Message"
+                placeholder="Tell us what you want to solve"
+                value={formData.message}
+                onChange={(event) => updateContactField('message', event.target.value)}
+                rows={5}
+                maxLength={1500}
+                required
+              />
+            </div>
+            <p className={`form-status ${formStatus}`} role="status" aria-live="polite">
+              {formMessage || 'Your request will be sent to info@theclosinggap.net.'}
+            </p>
+            <button className="button button-dark" type="submit" disabled={formIsSending}>
+              {formIsSending ? 'Sending...' : 'Submit Request'}
             </button>
           </form>
         </div>
