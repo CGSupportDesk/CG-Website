@@ -117,6 +117,21 @@ const legalNav: PageLink[] = [
   { key: 'cookie-policy', label: 'Cookie Policy' },
 ]
 
+const socialLinks = [
+  { label: 'LinkedIn', shortLabel: 'In', href: 'https://www.linkedin.com/company/closing-gap/' },
+  { label: 'Instagram', shortLabel: 'Ig', href: 'https://www.instagram.com/closinggap?igsh=MW5uNTJjbWpuNmVtZw==' },
+  { label: 'Facebook', shortLabel: 'Fb', href: 'https://www.facebook.com/profile.php?id=61586004990745' },
+  { label: 'Threads', shortLabel: 'Th', href: 'https://www.threads.com/@closinggap' },
+  { label: 'X', shortLabel: 'X', href: 'https://x.com/theclosinggap?t=pwjIyKLryNqWuvWzBZdE7A&s=09' },
+  { label: 'YouTube', shortLabel: 'Yt', href: 'https://www.youtube.com/' },
+  { label: 'Substack', shortLabel: 'Su', href: 'https://closinggap.substack.com/?r=6upoj0&utm_campaign=pub-share-checklist' },
+  {
+    label: 'Reddit',
+    shortLabel: 'Rd',
+    href: 'https://www.reddit.com/user/closinggap/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button',
+  },
+]
+
 const partnerLogos = [
   { name: 'Hex', src: images.logoHex },
   { name: 'MTgox', src: images.logoMt },
@@ -2447,6 +2462,20 @@ function SiteFooter() {
           <a href="mailto:info@theclosinggap.net">
             <Mail aria-hidden="true" /> info@theclosinggap.net
           </a>
+          <div className="footer-socials" aria-label="Closing Gap social media links">
+            {socialLinks.map((link) => (
+              <a
+                href={link.href}
+                key={link.label}
+                target="_blank"
+                rel="noreferrer noopener"
+                aria-label={`Follow Closing Gap on ${link.label}`}
+                title={link.label}
+              >
+                {link.shortLabel}
+              </a>
+            ))}
+          </div>
         </div>
       </div>
       <div className="footer-bottom">

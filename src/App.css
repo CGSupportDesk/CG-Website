@@ -2664,6 +2664,40 @@ img {
   color: var(--lime-2);
 }
 
+.footer-socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.footer-socials a {
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  color: var(--green);
+  background: var(--white);
+  border: 1px solid rgba(28, 75, 66, 0.1);
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  transition:
+    transform 180ms ease,
+    background 180ms ease,
+    border-color 180ms ease;
+}
+
+.footer-socials a:hover,
+.footer-socials a:focus-visible {
+  transform: translateY(-2px);
+  background: var(--lime);
+  border-color: var(--lime);
+  outline: 0;
+}
+
 .footer-bottom {
   display: flex;
   justify-content: space-between;
