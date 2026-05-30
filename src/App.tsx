@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import type { ChangeEvent, Dispatch, FormEvent, ReactNode, SetStateAction } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import type { ChangeEvent, Dispatch, FormEvent, MouseEvent as ReactMouseEvent, ReactNode, SetStateAction } from 'react'
 import { AnimatePresence, motion, useReducedMotion, useScroll } from 'framer-motion'
 import {
   ArrowUpRight,
@@ -27,8 +27,13 @@ import {
   X,
 } from 'lucide-react'
 import './App.css'
+import { importedServiceInsights } from './data/serviceInsights'
 
 const imageBase = '/reference/finovate-root/images/'
+const siteUrl = 'https://theclosinggap.net'
+const siteName = 'Closing Gap'
+const defaultSeoDescription =
+  'Closing Gap provides 360 degree business solutions across hiring, outsourcing, technology, automation, digital marketing, consulting, and workforce growth.'
 
 const images = {
   hero: `${imageBase}21-GettyImages-2184924844-a8780068.webp`,
@@ -69,7 +74,18 @@ type BlogPost = {
   description: string
   image: string
   sections: string[]
+  content?: ArticleContentSection[]
   featured?: boolean
+}
+
+type ArticleSubsection = {
+  heading: string
+  paragraphs: string[]
+  bullets: string[]
+}
+
+type ArticleContentSection = ArticleSubsection & {
+  subsections: ArticleSubsection[]
 }
 
 type BlogDraft = {
@@ -362,6 +378,7 @@ const emptyContactForm: ContactFormData = {
 }
 
 const defaultInsights: BlogPost[] = [
+  ...importedServiceInsights,
   {
     id: 'default-talent-pipeline',
     tag: 'Hiring',
@@ -571,7 +588,7 @@ function caseStudyPath(item: (typeof caseStudies)[number]) {
 }
 
 function pageHref(page: PageKey) {
-  return page === 'home' ? '#/' : `#/${page}`
+  return page === 'home' ? '/' : `/${page}`
 }
 
 function isBlogPost(value: unknown): value is BlogPost {
@@ -675,12 +692,33 @@ function isKnownRoute(route: string, insights: BlogPost[] = defaultInsights) {
   )
 }
 
-function getRouteFromHash(insights: BlogPost[] = defaultInsights): PageKey {
+function getLegacyHashRoute() {
+  if (typeof window === 'undefined' || !window.location.hash.startsWith('#/')) {
+    return ''
+  }
+
+  return window.location.hash.replace(/^#\/?/, '').split('?')[0]
+}
+
+function upgradeLegacyHashRoute() {
+  const legacyRoute = getLegacyHashRoute()
+  if (!legacyRoute) {
+    return
+  }
+
+  window.history.replaceState({}, '', pageHref(legacyRoute))
+}
+
+function getRouteFromLocation(insights: BlogPost[] = defaultInsights): PageKey {
   if (typeof window === 'undefined') {
     return 'home'
   }
 
-  const route = window.location.hash.replace(/^#\/?/, '').split('?')[0] || 'home'
+  const route =
+    getLegacyHashRoute() ||
+    window.location.pathname.replace(/^\/+|\/+$/g, '') ||
+    'home'
+
   return isKnownRoute(route, insights) ? route : 'not-found'
 }
 
@@ -710,31 +748,302 @@ function shouldShowIntroLoader() {
 
 function getContactNextUrl() {
   if (typeof window === 'undefined') {
-    return 'https://theclosinggap.net/#/contact'
+    return `${siteUrl}/contact`
   }
 
-  return `${window.location.origin}${window.location.pathname}#/contact`
+  return `${window.location.origin}/contact`
+}
+
+function handleInternalNavigation(event: ReactMouseEvent<HTMLDivElement>) {
+  if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+    return
+  }
+
+  const anchor = (event.target as HTMLElement).closest('a')
+  if (!anchor || anchor.target === '_blank' || anchor.hasAttribute('download')) {
+    return
+  }
+
+  const url = new URL(anchor.href)
+  if (url.origin !== window.location.origin || url.protocol !== window.location.protocol) {
+    return
+  }
+
+  if (url.pathname === window.location.pathname && url.search === window.location.search && url.hash) {
+    return
+  }
+
+  event.preventDefault()
+  window.history.pushState({}, '', `${url.pathname}${url.search}${url.hash}`)
+  window.dispatchEvent(new PopStateEvent('popstate'))
+}
+
+function toAbsoluteUrl(value: string) {
+  return value.startsWith('http') ? value : `${siteUrl}${value}`
+}
+
+function summarizeForSearch(value: string, limit = 160) {
+  if (value.length <= limit) {
+    return value
+  }
+
+  return `${value.slice(0, limit - 3).replace(/\s+\S*$/, '')}...`
+}
+
+function getStaticPageSeo(activePage: PageKey) {
+  const pages: Record<string, { title: string; description: string }> = {
+    home: {
+      title: '360 Degree Business Solutions | Closing Gap',
+      description: defaultSeoDescription,
+    },
+    services: {
+      title: '360 Degree Business Solutions & Services | Closing Gap',
+      description:
+        'Explore connected business solutions across global outsourcing, hiring, development, testing, digital marketing, automation, technology, consulting, and training.',
+    },
+    about: {
+      title: 'About Closing Gap | 360 Degree Business Solutions',
+      description:
+        'Learn how Closing Gap helps ambitious businesses close execution gaps across talent, technology, operations, marketing, and growth.',
+    },
+    team: {
+      title: 'Closing Gap Team | Business Growth Specialists',
+      description:
+        'Meet the Closing Gap specialists supporting strategy, staffing, outsourcing, marketing, automation, technology, and delivery.',
+    },
+    insights: {
+      title: 'Business Growth Insights | Closing Gap',
+      description:
+        'Read practical guides on hiring, global outsourcing, development, testing, marketing, automation, technology, training, and business consulting.',
+    },
+    faqs: {
+      title: 'Frequently Asked Questions | Closing Gap',
+      description:
+        'Get clear answers about Closing Gap services, hiring timelines, automation, personal branding, development quality, and startup support.',
+    },
+    contact: {
+      title: 'Contact Closing Gap | Book a Free Consultation',
+      description:
+        'Talk to Closing Gap about hiring, outsourcing, digital growth, automation, technology, consulting, training, or connected 360 degree business support.',
+    },
+  }
+
+  return (
+    pages[activePage] ?? {
+      title: `${activePage
+        .split('/')
+        .pop()
+        ?.split('-')
+        .map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1)}`)
+        .join(' ')} | Closing Gap`,
+      description: defaultSeoDescription,
+    }
+  )
+}
+
+function getSeoDetails(activePage: PageKey, insights: BlogPost[]) {
+  const article = insights.find((item) => insightPath(item) === activePage)
+  const service = coreServices.find((item) => servicePath(item) === activePage)
+  const caseStudy = caseStudies.find((item) => caseStudyPath(item) === activePage)
+  const fallback = getStaticPageSeo(activePage)
+
+  if (article) {
+    return {
+      title: `${article.title} | Closing Gap`,
+      description: summarizeForSearch(article.description),
+      image: article.image,
+      type: 'article',
+    }
+  }
+
+  if (service) {
+    return {
+      title: `${service.title} Solutions | Closing Gap`,
+      description: summarizeForSearch(service.detail),
+      image: service.image,
+      type: 'website',
+    }
+  }
+
+  if (caseStudy) {
+    return {
+      title: `${caseStudy.title} | Closing Gap Case Study`,
+      description: summarizeForSearch(caseStudy.description),
+      image: caseStudy.image,
+      type: 'article',
+    }
+  }
+
+  return {
+    ...fallback,
+    image: images.hero,
+    type: 'website',
+  }
+}
+
+function upsertMeta(attribute: 'name' | 'property', key: string, content: string) {
+  let meta = document.head.querySelector<HTMLMetaElement>(`meta[${attribute}="${key}"]`)
+  if (!meta) {
+    meta = document.createElement('meta')
+    meta.setAttribute(attribute, key)
+    document.head.appendChild(meta)
+  }
+  meta.content = content
+}
+
+function buildStructuredData(activePage: PageKey, insights: BlogPost[]) {
+  const article = insights.find((item) => insightPath(item) === activePage)
+  const service = coreServices.find((item) => servicePath(item) === activePage)
+  const canonicalUrl = `${siteUrl}${pageHref(activePage)}`
+  const schemas: Record<string, unknown>[] = [
+    {
+      '@type': 'Organization',
+      '@id': `${siteUrl}/#organization`,
+      name: siteName,
+      legalName: 'Beyond Closinggap Private Limited',
+      url: siteUrl,
+      logo: `${siteUrl}/assets/logo.png`,
+      description: defaultSeoDescription,
+      email: 'info@theclosinggap.net',
+      telephone: ['+91 90742 94791', '+44 20 4615 3030'],
+      sameAs: socialLinks.map((link) => link.href),
+      address: [
+        {
+          '@type': 'PostalAddress',
+          streetAddress: '128 City Road',
+          addressLocality: 'London',
+          postalCode: 'EC1V 2NX',
+          addressCountry: 'GB',
+        },
+        {
+          '@type': 'PostalAddress',
+          streetAddress: '3rd Floor, Sharon Bliss, Plamoodu-Charachira Road, Pattom',
+          addressLocality: 'Trivandrum',
+          postalCode: '695003',
+          addressCountry: 'IN',
+        },
+      ],
+    },
+  ]
+
+  if (activePage === 'home') {
+    schemas.push({
+      '@type': 'WebSite',
+      '@id': `${siteUrl}/#website`,
+      url: siteUrl,
+      name: siteName,
+      publisher: { '@id': `${siteUrl}/#organization` },
+    })
+  }
+
+  if (activePage !== 'home' && activePage !== 'admin' && activePage !== 'not-found') {
+    schemas.push({
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
+        { '@type': 'ListItem', position: 2, name: getSeoDetails(activePage, insights).title, item: canonicalUrl },
+      ],
+    })
+  }
+
+  if (service) {
+    schemas.push({
+      '@type': 'Service',
+      name: `${service.title} Solutions`,
+      description: service.detail,
+      url: canonicalUrl,
+      provider: { '@id': `${siteUrl}/#organization` },
+      areaServed: ['India', 'United Kingdom', 'Worldwide'],
+    })
+  }
+
+  if (article) {
+    schemas.push({
+      '@type': 'BlogPosting',
+      headline: article.title,
+      description: article.description,
+      image: [toAbsoluteUrl(article.image)],
+      mainEntityOfPage: canonicalUrl,
+      author: { '@id': `${siteUrl}/#organization` },
+      publisher: { '@id': `${siteUrl}/#organization` },
+    })
+  }
+
+  if (activePage === 'faqs') {
+    schemas.push({
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((faq) => ({
+        '@type': 'Question',
+        name: faq.question,
+        acceptedAnswer: { '@type': 'Answer', text: faq.answer },
+      })),
+    })
+  }
+
+  return { '@context': 'https://schema.org', '@graph': schemas }
+}
+
+function SeoHead({ activePage, insights }: { activePage: PageKey; insights: BlogPost[] }) {
+  useEffect(() => {
+    const seo = getSeoDetails(activePage, insights)
+    const canonicalUrl = `${siteUrl}${pageHref(activePage)}`
+    const shouldIndex = activePage !== 'admin' && activePage !== 'not-found'
+
+    document.title = seo.title
+    upsertMeta('name', 'description', seo.description)
+    upsertMeta('name', 'robots', shouldIndex ? 'index, follow, max-image-preview:large' : 'noindex, nofollow')
+    upsertMeta('property', 'og:site_name', siteName)
+    upsertMeta('property', 'og:title', seo.title)
+    upsertMeta('property', 'og:description', seo.description)
+    upsertMeta('property', 'og:type', seo.type)
+    upsertMeta('property', 'og:url', canonicalUrl)
+    upsertMeta('property', 'og:image', toAbsoluteUrl(seo.image))
+    upsertMeta('name', 'twitter:card', 'summary_large_image')
+    upsertMeta('name', 'twitter:title', seo.title)
+    upsertMeta('name', 'twitter:description', seo.description)
+    upsertMeta('name', 'twitter:image', toAbsoluteUrl(seo.image))
+
+    let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]')
+    if (!canonical) {
+      canonical = document.createElement('link')
+      canonical.rel = 'canonical'
+      document.head.appendChild(canonical)
+    }
+    canonical.href = canonicalUrl
+
+    let script = document.head.querySelector<HTMLScriptElement>('#closing-gap-structured-data')
+    if (!script) {
+      script = document.createElement('script')
+      script.id = 'closing-gap-structured-data'
+      script.type = 'application/ld+json'
+      document.head.appendChild(script)
+    }
+    script.textContent = JSON.stringify(buildStructuredData(activePage, insights))
+  }, [activePage, insights])
+
+  return null
 }
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [activeFaq, setActiveFaq] = useState(0)
   const [customInsights, setCustomInsights] = useState<BlogPost[]>(() => readCustomInsights())
-  const insights = getInsights(customInsights)
-  const [activePage, setActivePage] = useState<PageKey>(() => getRouteFromHash(insights))
+  const insights = useMemo(() => getInsights(customInsights), [customInsights])
+  const [activePage, setActivePage] = useState<PageKey>(() => getRouteFromLocation(insights))
   const [showIntro, setShowIntro] = useState(() => shouldShowIntroLoader())
   const { scrollYProgress } = useScroll()
   const prefersReducedMotion = useReducedMotion()
 
   useEffect(() => {
     const syncRoute = () => {
-      setActivePage(getRouteFromHash(getInsights(customInsights)))
+      setActivePage(getRouteFromLocation(getInsights(customInsights)))
       setMenuOpen(false)
     }
 
+    upgradeLegacyHashRoute()
     syncRoute()
-    window.addEventListener('hashchange', syncRoute)
-    return () => window.removeEventListener('hashchange', syncRoute)
+    window.addEventListener('popstate', syncRoute)
+    return () => window.removeEventListener('popstate', syncRoute)
   }, [customInsights])
 
   useEffect(() => {
@@ -762,7 +1071,8 @@ function App() {
   }, [prefersReducedMotion, showIntro])
 
   return (
-    <div className="site-shell">
+    <div className="site-shell" onClick={handleInternalNavigation}>
+      <SeoHead activePage={activePage} insights={insights} />
       <AnimatePresence>{showIntro ? <IntroLoader /> : null}</AnimatePresence>
       <motion.div
         className="scroll-progress"
@@ -926,7 +1236,7 @@ function RevealSection({ className, children }: { className: string; children: R
       className={className}
       initial={prefersReducedMotion ? false : { opacity: 0, y: 28 }}
       whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.18 }}
+      viewport={{ once: true, amount: 'some' }}
       transition={{ duration: 0.56, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
@@ -1749,6 +2059,8 @@ function InsightsPage({ insights }: { insights: BlogPost[] }) {
 }
 
 function ArticleDetailPage({ article }: { article: BlogPost }) {
+  const hasLongFormContent = Boolean(article.content?.length)
+
   return (
     <>
       <PageHero
@@ -1757,13 +2069,64 @@ function ArticleDetailPage({ article }: { article: BlogPost }) {
         title={<>{article.title}</>}
         copy={article.description}
       />
-      <RevealSection className="article-section section-shell">
-        {article.sections.map((section, index) => (
-          <article key={section}>
-            <span>{String(index + 1).padStart(2, '0')}</span>
-            <p>{section}</p>
-          </article>
-        ))}
+      <RevealSection className={`article-section section-shell ${hasLongFormContent ? 'article-longform' : ''}`}>
+        {hasLongFormContent
+          ? article.content?.map((section, index) => (
+              <article key={section.heading}>
+                <span>{String(index + 1).padStart(2, '0')}</span>
+                <div className="article-copy">
+                  <h2>{section.heading}</h2>
+                  {section.paragraphs.map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                  {section.bullets.length > 0 ? (
+                    <ul>
+                      {section.bullets.map((bullet) => (
+                        <li key={bullet}>{bullet}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {section.subsections.map((subsection) => (
+                    <section className="article-subsection" key={subsection.heading}>
+                      <h3>{subsection.heading}</h3>
+                      {subsection.paragraphs.map((paragraph) => (
+                        <p key={paragraph}>{paragraph}</p>
+                      ))}
+                      {subsection.bullets.length > 0 ? (
+                        <ul>
+                          {subsection.bullets.map((bullet) => (
+                            <li key={bullet}>{bullet}</li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </section>
+                  ))}
+                </div>
+              </article>
+            ))
+          : article.sections.map((section, index) => (
+              <article key={section}>
+                <span>{String(index + 1).padStart(2, '0')}</span>
+                <p>{section}</p>
+              </article>
+            ))}
+        <article className="article-next-step">
+          <span>
+            <ArrowUpRight aria-hidden="true" />
+          </span>
+          <div className="article-copy">
+            <h2>Need a practical next step?</h2>
+            <p>Talk to Closing Gap about a connected 360 degree plan shaped around your business goals.</p>
+            <div className="paired-buttons">
+              <a className="button button-dark" href={pageHref('contact')}>
+                Book a Free Consultation
+              </a>
+              <a className="button button-light" href={pageHref('services')}>
+                Explore Solutions
+              </a>
+            </div>
+          </div>
+        </article>
       </RevealSection>
       <Newsletter />
     </>
