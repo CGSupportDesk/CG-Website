@@ -29,35 +29,50 @@ import {
 import './App.css'
 import { importedServiceInsights } from './data/serviceInsights'
 
-const imageBase = '/reference/finovate-root/images/'
+const imageBase = '/assets/closing-gap/'
+const legacyImageBase = '/reference/finovate-root/images/'
+const legacySecondaryImageBase = '/reference/finovate/images/'
 const siteUrl = 'https://theclosinggap.net'
 const siteName = 'Closing Gap'
 const defaultSeoDescription =
   'Closing Gap provides 360 degree business solutions across hiring, outsourcing, technology, automation, digital marketing, consulting, and workforce growth.'
 
 const images = {
-  hero: `${imageBase}21-GettyImages-2184924844-a8780068.webp`,
-  metric: `${imageBase}24-GettyImages-2041846314-6fbefa66.webp`,
-  cta: `${imageBase}35-GettyImages-1364057915-ed1c15eb.webp`,
-  advisor: `${imageBase}36-GettyImages-1824276392-148538d4.webp`,
-  newsletter: `${imageBase}41-GettyImages-2163451178-cd059ca6.webp`,
-  blogOne: `${imageBase}37-GettyImages-2162109308-3f385f13.webp`,
-  blogThree: `${imageBase}40-GettyImages-1502868925-0eb08f21.webp`,
-  report: `${imageBase}39-Piled-Up-Books-Mockup-17e5a4cc.webp`,
-  serviceOne: `${imageBase}26-GettyImages-1848411099-a8a8a589.webp`,
-  serviceTwo: `${imageBase}29-GettyImages-2180893170-d6657911.webp`,
-  serviceThree: `${imageBase}31-GettyImages-1218283950-7522b01e.webp`,
-  serviceFour: `${imageBase}33-GettyImages-1294412622-1jpg-3fe9c57f.webp`,
-  headOne: `${imageBase}02-pexels-mart-production-7222858-3f71ca60.webp`,
-  headTwo: `${imageBase}04-pexels-mikhail-nilov-7677869-0887b01e.webp`,
-  headThree: `${imageBase}06-pexels-karolina-grabowska-7681192-c55ab0ab.webp`,
-  headFour: `${imageBase}10-pexels-thisisengineering-3861962-1-267e5455.webp`,
-  logoHex: `${imageBase}15-hex-2f056940.svg`,
-  logoMt: `${imageBase}16-MTgox-5aa9a44f.svg`,
-  logoSavex: `${imageBase}17-savex-6da01b7d.svg`,
-  logoCoinbase: `${imageBase}18-coinbase-b9d40600.svg`,
-  logoKonstruktion: `${imageBase}19-konstruktion-3071516d.svg`,
-  logoMeta: `${imageBase}20-meta-377aa782.svg`,
+  brandLogo: `${imageBase}brand-logo.webp`,
+  brandLogoLight: `${imageBase}brand-logo-light.webp`,
+  brandMark: `${imageBase}brand-mark.webp`,
+  hero: `${imageBase}hero-360-business-solutions.webp`,
+  metric: `${imageBase}home-metrics-operations.webp`,
+  cta: `${imageBase}home-consultation-cta.webp`,
+  advisor: `${imageBase}advisor-meeting.webp`,
+  newsletter: `${imageBase}newsletter-insights.webp`,
+  blogOne: `${imageBase}service-digital-marketing.webp`,
+  blogThree: `${imageBase}service-business-automation.webp`,
+  report: `${imageBase}ebook-cover-mockup.webp`,
+  serviceGlobal: `${imageBase}service-global-outsourcing.webp`,
+  serviceDevelopment: `${imageBase}service-development-testing.webp`,
+  serviceMarketing: `${imageBase}service-digital-marketing.webp`,
+  serviceAutomation: `${imageBase}service-business-automation.webp`,
+  serviceHiring: `${imageBase}service-hiring-staffing.webp`,
+  serviceBranding: `${imageBase}service-personal-branding.webp`,
+  serviceStartup: `${imageBase}service-startup-smb.webp`,
+  serviceTechnology: `${imageBase}service-technology-solutions.webp`,
+  serviceTraining: `${imageBase}service-training-upskilling.webp`,
+  serviceConsulting: `${imageBase}service-business-consulting.webp`,
+  teamDelivery: `${imageBase}team-delivery-strategy.webp`,
+  teamTalent: `${imageBase}team-talent-desk.webp`,
+  teamAutomation: `${imageBase}team-automation-lab.webp`,
+  teamGrowth: `${imageBase}team-growth-studio.webp`,
+  clientRukCabs: `${imageBase}client-ruk-cabs.webp`,
+  clientSarensNass: `${imageBase}client-sarens-nass.webp`,
+  clientGoalFoc: '/assets/partner-goalfoc.png',
+  clientMyShopp: `${imageBase}client-my-shopp.webp`,
+  clientPurpleHealth: `${imageBase}client-purple-health.webp`,
+  clientHti: `${imageBase}client-hti.webp`,
+  clientToska: `${imageBase}client-toska.webp`,
+  certIaf: `${imageBase}cert-iaf.webp`,
+  certKeralaStartupMission: `${imageBase}cert-kerala-startup-mission.webp`,
+  certDpiit: `${imageBase}cert-dpiit.webp`,
 }
 
 type PageKey = string
@@ -165,12 +180,19 @@ const socialLinks = [
 ]
 
 const partnerLogos = [
-  { name: 'Hex', src: images.logoHex },
-  { name: 'MTgox', src: images.logoMt },
-  { name: 'Savex', src: images.logoSavex },
-  { name: 'Coinbase', src: images.logoCoinbase },
-  { name: 'Konstruktion', src: images.logoKonstruktion },
-  { name: 'Meta', src: images.logoMeta },
+  { name: 'RUK CABS', src: images.clientRukCabs },
+  { name: 'Sarens Nass', src: images.clientSarensNass },
+  { name: 'GoalFoc', src: images.clientGoalFoc },
+  { name: 'My Shopp', src: images.clientMyShopp },
+  { name: 'Purple Health', src: images.clientPurpleHealth },
+  { name: 'HTI', src: images.clientHti },
+  { name: 'TOSKA', src: images.clientToska },
+]
+
+const certificationLogos = [
+  { name: 'International Accreditation Forum', src: images.certIaf },
+  { name: 'Kerala Startup Mission', src: images.certKeralaStartupMission },
+  { name: 'DPIIT', src: images.certDpiit },
 ]
 
 const coreServices = [
@@ -179,7 +201,7 @@ const coreServices = [
     description: 'Global delivery capacity for operations, support, and project execution.',
     detail:
       'Build reliable offshore capacity with role planning, delivery governance, onboarding support, and a practical operating rhythm.',
-    image: images.serviceTwo,
+    image: images.serviceGlobal,
     icon: Globe2,
     bullets: ['Role planning', 'Compliance coordination', 'Remote delivery support'],
     outcomes: ['Lower delivery overhead', 'Cleaner onboarding', 'More scalable execution'],
@@ -189,7 +211,7 @@ const coreServices = [
     description: 'Web, cloud, app, QA, security, and performance support for reliable digital products.',
     detail:
       'Plan, build, test, and release digital products with engineering support that keeps quality visible throughout the project.',
-    image: images.serviceThree,
+    image: images.serviceDevelopment,
     icon: Layers,
     bullets: ['Web and app delivery', 'QA planning', 'Release support'],
     outcomes: ['Fewer release surprises', 'Clearer technical delivery', 'Better product reliability'],
@@ -199,7 +221,7 @@ const coreServices = [
     description: 'SEO, paid media, content, analytics, and performance campaigns connected to revenue.',
     detail:
       'Turn visibility into qualified demand with search, paid campaigns, content, social execution, and reporting that supports decisions.',
-    image: images.serviceFour,
+    image: images.serviceMarketing,
     icon: BarChart3,
     bullets: ['SEO and paid ads', 'Content planning', 'Performance tracking'],
     outcomes: ['Sharper visibility', 'Better lead quality', 'Clearer marketing ROI'],
@@ -209,7 +231,7 @@ const coreServices = [
     description: 'CRM, workflow, lead routing, and messaging automation that reduces manual drag.',
     detail:
       'Connect forms, messages, CRMs, follow-ups, reports, and internal workflows so repeated work moves without constant manual effort.',
-    image: images.serviceOne,
+    image: images.serviceAutomation,
     icon: Workflow,
     bullets: ['CRM workflows', 'Lead routing', 'WhatsApp replies'],
     outcomes: ['Faster response times', 'Fewer missed follow-ups', 'Cleaner operations'],
@@ -219,7 +241,7 @@ const coreServices = [
     description: 'Fast candidate shortlisting, screening, and staffing support for high-impact roles.',
     detail:
       'Find the right people faster with focused role definition, candidate screening, interview support, and staffing coordination.',
-    image: images.headTwo,
+    image: images.serviceHiring,
     icon: Users,
     bullets: ['Talent sourcing', 'AI-assisted screening', 'Interview support'],
     outcomes: ['Better candidate fit', 'Less resume noise', 'Faster hiring cycles'],
@@ -229,7 +251,7 @@ const coreServices = [
     description: 'Resume, LinkedIn, interview, and content support for leaders and professionals.',
     detail:
       'Clarify professional positioning through ATS-friendly resumes, LinkedIn profile work, interview coaching, and practical content direction.',
-    image: images.headThree,
+    image: images.serviceBranding,
     icon: ShieldCheck,
     bullets: ['ATS resumes', 'LinkedIn makeover', 'Interview coaching'],
     outcomes: ['Stronger profile clarity', 'Better recruiter visibility', 'More confident interviews'],
@@ -239,7 +261,7 @@ const coreServices = [
     description: 'Lean 360-degree support for founders who need execution capacity without heavy overhead.',
     detail:
       'Give startups and SMBs access to flexible growth support across marketing, operations, hiring, automation, and technical delivery.',
-    image: images.blogOne,
+    image: images.serviceStartup,
     icon: CircleDot,
     bullets: ['Go-to-market plans', 'Operating systems', 'Founder support'],
     outcomes: ['Lean execution capacity', 'Practical launch support', 'Better founder focus'],
@@ -249,7 +271,7 @@ const coreServices = [
     description: 'Integrated business systems using Zoho, Power Platform, dashboards, and connected tools.',
     detail:
       'Design practical business systems with connected tools, dashboards, automations, and integrations that match daily workflows.',
-    image: images.metric,
+    image: images.serviceTechnology,
     icon: Layers,
     bullets: ['Zoho systems', 'Power Platform', 'Dashboards'],
     outcomes: ['Connected tool stack', 'Cleaner reporting', 'Stronger operating visibility'],
@@ -259,7 +281,7 @@ const coreServices = [
     description: 'Hire-train-deploy, team enablement, and practical skill programs for growth teams.',
     detail:
       'Support teams with role-based learning, hire-train-deploy models, and practical upskilling designed around business outcomes.',
-    image: images.headFour,
+    image: images.serviceTraining,
     icon: CheckCircle2,
     bullets: ['Role-based training', 'HTD programs', 'Team enablement'],
     outcomes: ['Sharper team capability', 'Faster ramp-up', 'Better role readiness'],
@@ -269,7 +291,7 @@ const coreServices = [
     description: '360° strategy, process design, governance, and operating rhythm advisory.',
     detail:
       'Clarify priorities, build a workable plan, define ownership, and improve execution rhythm across teams and functions.',
-    image: images.advisor,
+    image: images.serviceConsulting,
     icon: Workflow,
     bullets: ['Process mapping', 'Growth planning', 'Governance'],
     outcomes: ['Clearer priorities', 'Better accountability', 'Stronger execution rhythm'],
@@ -354,10 +376,10 @@ const faqs = [
 ]
 
 const teamMembers = [
-  { name: 'Delivery Strategy', role: 'Consulting & Operations', image: images.headOne },
-  { name: 'Talent Desk', role: 'Hiring & Staffing', image: images.headTwo },
-  { name: 'Automation Lab', role: 'Systems & Workflow', image: images.headThree },
-  { name: 'Growth Studio', role: 'Marketing & Branding', image: images.headFour },
+  { name: 'Delivery Strategy', role: 'Consulting & Operations', image: images.teamDelivery },
+  { name: 'Talent Desk', role: 'Hiring & Staffing', image: images.teamTalent },
+  { name: 'Automation Lab', role: 'Systems & Workflow', image: images.teamAutomation },
+  { name: 'Growth Studio', role: 'Marketing & Branding', image: images.teamGrowth },
 ]
 
 const emptyBlogDraft: BlogDraft = {
@@ -424,7 +446,7 @@ const caseStudies = [
     metric: '32% lower delivery overhead',
     description:
       'Closing Gap helped structure a lean overseas delivery team with role clarity, onboarding rhythm, and QA support.',
-    image: images.serviceTwo,
+    image: images.serviceGlobal,
     challenge: 'The client needed delivery capacity without adding heavy local overhead or slowing active projects.',
     solution: 'We mapped roles, defined communication rhythm, supported onboarding, and created a quality review loop.',
     result: 'Delivery overhead dropped while project control and team visibility improved.',
@@ -434,7 +456,7 @@ const caseStudies = [
     metric: '35% lift in conversion',
     description:
       'Lead capture, WhatsApp replies, and CRM updates were connected into a cleaner response workflow.',
-    image: images.newsletter,
+    image: images.serviceAutomation,
     challenge: 'Manual follow-up meant leads were being missed during peak campaign periods.',
     solution: 'We connected inquiry forms, messaging, CRM updates, and assignment rules into one response workflow.',
     result: 'Response time improved and sales conversion increased across the next campaign cycle.',
@@ -444,7 +466,7 @@ const caseStudies = [
     metric: '3x traffic in 90 days',
     description:
       'SEO, content, paid campaigns, and reporting cadence helped turn web visibility into qualified inquiries.',
-    image: images.blogOne,
+    image: images.serviceMarketing,
     challenge: 'The brand had low search visibility and inconsistent lead quality.',
     solution: 'We tightened campaign targeting, improved content structure, and introduced weekly performance reporting.',
     result: 'Website traffic tripled and inquiries became easier to qualify.',
@@ -455,25 +477,25 @@ const works = [
   {
     title: 'CRM Automation Blueprint',
     tag: 'Automation',
-    image: images.newsletter,
+    image: images.serviceAutomation,
     description: 'Lead capture, CRM fields, handoff rules, and reporting designed as one connected workflow.',
   },
   {
     title: 'Hiring Funnel Redesign',
     tag: 'Talent',
-    image: images.headTwo,
+    image: images.serviceHiring,
     description: 'A cleaner screening and interview rhythm for faster shortlist quality.',
   },
   {
     title: 'Growth Website Refresh',
     tag: 'Marketing',
-    image: images.blogOne,
+    image: images.serviceMarketing,
     description: 'Messaging, landing flow, conversion sections, and analytics structure for a service brand.',
   },
   {
     title: 'Delivery Governance System',
     tag: 'Operations',
-    image: images.advisor,
+    image: images.serviceConsulting,
     description: 'Weekly reporting, ownership maps, escalation paths, and quality checkpoints.',
   },
 ]
@@ -498,12 +520,12 @@ const ebooks = [
   {
     title: 'Outsourcing Setup Checklist',
     description: 'Questions, role maps, and governance points before building an offshore delivery model.',
-    image: images.serviceTwo,
+    image: images.serviceGlobal,
   },
   {
     title: 'Automation Planning Workbook',
     description: 'A guided workbook for prioritizing workflows that save time and protect lead quality.',
-    image: images.serviceOne,
+    image: images.serviceAutomation,
   },
 ]
 
@@ -622,6 +644,8 @@ function cleanText(value: string, limit = 240) {
 function isSafeBlogImage(image: string) {
   return (
     image.startsWith(imageBase) ||
+    image.startsWith(legacyImageBase) ||
+    image.startsWith(legacySecondaryImageBase) ||
     image.startsWith('/assets/') ||
     allowedUploadTypes.some((type) => image.startsWith(`data:${type};base64,`))
   )
@@ -902,7 +926,7 @@ function buildStructuredData(activePage: PageKey, insights: BlogPost[]) {
       name: siteName,
       legalName: 'Beyond Closinggap Private Limited',
       url: siteUrl,
-      logo: `${siteUrl}/assets/logo.png`,
+      logo: `${siteUrl}${images.brandLogo}`,
       description: defaultSeoDescription,
       email: 'info@theclosinggap.net',
       telephone: ['+91 90742 94791', '+44 20 4615 3030'],
@@ -1278,9 +1302,7 @@ function Header({
   return (
     <header className="site-header">
       <a className="brand" href={pageHref('home')} aria-label="Closing Gap home">
-        <span className="brand-mark">
-          <Asterisk aria-hidden="true" />
-        </span>
+        <img className="brand-symbol" src={images.brandMark} alt="" />
         <span>Closing Gap</span>
       </a>
       <nav className="desktop-nav" aria-label="Primary navigation">
@@ -1740,7 +1762,7 @@ function Testimonials() {
           made the plan clear and helped us move faster without losing control.
         </p>
         <div className="quote-footer">
-          <img src={images.headTwo} alt="" />
+          <img src={images.serviceHiring} alt="" />
           <div>
             <strong>Amit Bansal</strong>
             <span>Co-Founder</span>
@@ -1764,6 +1786,16 @@ function PartnerLogoRow() {
   return (
     <div className="logo-row" aria-label="Partner categories">
       {partnerLogos.map((logo) => (
+        <img src={logo.src} alt={`${logo.name} logo`} key={logo.name} />
+      ))}
+    </div>
+  )
+}
+
+function CertificationLogoRow() {
+  return (
+    <div className="certification-row" aria-label="Certifications and recognitions">
+      {certificationLogos.map((logo) => (
         <img src={logo.src} alt={`${logo.name} logo`} key={logo.name} />
       ))}
     </div>
@@ -1873,7 +1905,7 @@ function ServicesPage() {
     <>
       <PageHero
         kicker="360° solutions"
-        image={images.serviceThree}
+        image={images.serviceDevelopment}
         title={
           <>
             Business Solutions That Close <span>Execution Gaps</span>
@@ -2299,7 +2331,7 @@ function FaqPage({
     <>
       <PageHero
         kicker="FAQs"
-        image={images.serviceOne}
+        image={images.serviceAutomation}
         title={
           <>
             Answers Before We <span>Start the Work</span>
@@ -2816,6 +2848,7 @@ function ClientsPartnersPage() {
           <StatsRow />
         </div>
         <PartnerLogoRow />
+        <CertificationLogoRow />
       </RevealSection>
       <Testimonials />
     </>
@@ -2827,7 +2860,7 @@ function CareersPage() {
     <>
       <PageHero
         kicker="Careers"
-        image={images.headFour}
+        image={images.teamGrowth}
         title={
           <>
             Build Meaningful Work With <span>Closing Gap</span>
@@ -2861,7 +2894,7 @@ function CsrPage() {
     <>
       <PageHero
         kicker="CSR"
-        image={images.serviceOne}
+        image={images.serviceAutomation}
         title={
           <>
             Growth Should Create <span>Opportunity</span>
@@ -3076,9 +3109,7 @@ function SiteFooter() {
   return (
     <footer className="contact-footer">
       <div className="footer-brand">
-        <span className="brand-mark">
-          <Asterisk aria-hidden="true" />
-        </span>
+        <img className="brand-symbol" src={images.brandMark} alt="" />
         <span>Closing Gap</span>
       </div>
       <div className="footer-grid">

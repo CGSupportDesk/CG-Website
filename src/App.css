@@ -216,6 +216,19 @@ img {
   white-space: nowrap;
 }
 
+.brand-symbol {
+  display: block;
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+}
+
+.footer-brand .brand-symbol {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+}
+
 .brand-mark {
   display: inline-flex;
   width: 45px;
@@ -794,7 +807,7 @@ img {
   color: var(--white);
   background:
     linear-gradient(rgba(28, 75, 66, 0.82), rgba(28, 75, 66, 0.82)),
-    url('/reference/finovate-root/images/27-GettyImages-1887449071-89a82eb0.webp') center/cover;
+    url('/assets/closing-gap/home-metrics-operations.webp') center/cover;
 }
 
 .image-backed span,
@@ -1427,21 +1440,36 @@ img {
 .logo-row {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(126px, 1fr));
   gap: 12px;
   align-items: center;
   padding-top: 44px;
 }
 
-.logo-row img {
+.logo-row img,
+.certification-row img {
   width: 100%;
   height: 78px;
   object-fit: contain;
-  padding: 22px 28px;
+  padding: 14px 20px;
   background: var(--cream);
   border-radius: var(--radius-md);
-  filter: saturate(0.1);
-  opacity: 0.82;
+  filter: none;
+  opacity: 1;
+}
+
+.certification-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  align-items: center;
+  padding-top: 12px;
+}
+
+.certification-row img {
+  height: 92px;
+  filter: none;
 }
 
 .insights-section {
@@ -3235,6 +3263,11 @@ img {
     font-size: 21px;
   }
 
+  .brand-symbol {
+    width: 40px;
+    height: 40px;
+  }
+
   .brand-mark {
     width: 40px;
     height: 40px;
@@ -3335,7 +3368,7 @@ img {
   .image-backed {
     background:
       linear-gradient(rgba(28, 75, 66, 0.82), rgba(28, 75, 66, 0.82)),
-      url('/reference/finovate-root/images/27-GettyImages-1887449071-89a82eb0.webp') center/cover;
+      url('/assets/closing-gap/home-metrics-operations.webp') center/cover;
   }
 
   .intro-section,

@@ -7,68 +7,67 @@ if (!sourcePath) {
   throw new Error('Usage: node scripts/import-service-insights.mjs <source-markdown> [output-file]')
 }
 
-const imageBase = '/reference/finovate-root/images/'
-const secondaryImageBase = '/reference/finovate/images/'
+const imageBase = '/assets/closing-gap/'
 const articleSpecs = [
   {
     start: 3,
     tag: 'Hiring & Staffing',
     title: 'Hiring & Staffing Solutions for Growing Businesses',
-    image: `${imageBase}29-GettyImages-2180893170-d6657911.webp`,
+    image: `${imageBase}service-hiring-staffing.webp`,
   },
   {
     start: 209,
     tag: 'Global Outsourcing',
     title: 'Global Outsourcing Solutions for Modern Business Growth',
-    image: `${imageBase}36-GettyImages-1824276392-148538d4.webp`,
+    image: `${imageBase}service-global-outsourcing.webp`,
   },
   {
     start: 415,
     tag: 'Development & Testing',
     title: 'Development & Testing Solutions for Modern Digital Growth',
-    image: `${secondaryImageBase}39-GettyImages-1498516652-82bfda7c.jpg`,
+    image: `${imageBase}service-development-testing.webp`,
   },
   {
     start: 614,
     tag: 'Digital Marketing',
     title: 'Digital Marketing Solutions for Modern Business Growth',
-    image: `${imageBase}37-GettyImages-2162109308-3f385f13.webp`,
+    image: `${imageBase}service-digital-marketing.webp`,
   },
   {
     start: 837,
     tag: 'Business Automation',
     title: 'Business Automation Solutions for Smarter Operations',
-    image: `${imageBase}33-GettyImages-1294412622-1jpg-3fe9c57f.webp`,
+    image: `${imageBase}service-business-automation.webp`,
   },
   {
     start: 1045,
     tag: 'Personal Branding',
     title: 'Personal Branding Solutions for Modern Professionals & Businesses',
-    image: `${secondaryImageBase}38-GettyImages-1313460596-8bdc7ab8.webp`,
+    image: `${imageBase}service-personal-branding.webp`,
   },
   {
     start: 1251,
     tag: 'Startup & SMB',
     title: 'Startup & SMB Solutions for Sustainable Business Growth',
-    image: `${secondaryImageBase}32-GettyImages-1394467242-3d8aa6ea.webp`,
+    image: `${imageBase}service-startup-smb.webp`,
   },
   {
     start: 1460,
     tag: 'Technology Solutions',
     title: 'Technology Solutions for Modern Business Transformation',
-    image: `${secondaryImageBase}40-GettyImages-2161896288-d74dbb85.webp`,
+    image: `${imageBase}service-technology-solutions.webp`,
   },
   {
     start: 1685,
     tag: 'Training & Upskilling',
     title: 'Training & Upskilling Solutions for Workforce Growth',
-    image: `${secondaryImageBase}36-pexels-rdne-7821936-427b1cbc.webp`,
+    image: `${imageBase}service-training-upskilling.webp`,
   },
   {
     start: 1891,
     tag: 'Business Consulting',
     title: 'Business Consulting Solutions for Strategic Growth',
-    image: `${secondaryImageBase}29-GettyImages-2149615639-769b94a3.jpg`,
+    image: `${imageBase}service-business-consulting.webp`,
   },
 ]
 

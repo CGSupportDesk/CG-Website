@@ -6,7 +6,7 @@ export const importedServiceInsights = [
     "tag": "Hiring & Staffing",
     "title": "Hiring & Staffing Solutions for Growing Businesses",
     "description": "Finding the right talent is no longer just about filling positions. Modern businesses need skilled professionals, faster hiring processes, reliable staffing support, and recruitment strategies that help...",
-    "image": "/reference/finovate-root/images/29-GettyImages-2180893170-d6657911.webp",
+    "image": "/assets/closing-gap/service-hiring-staffing.webp",
     "featured": false,
     "sections": [
       "Finding the right talent is no longer just about filling positions. Modern businesses need skilled professionals, faster hiring processes, reliable staffing support, and recruitment strategies that help teams grow sustainably. Our Hiring & Staffing services are designed to help businesses simplify recruitment, improve workforce quality, and build stronger teams without unnecessary delays or complexity.",
@@ -238,7 +238,7 @@ export const importedServiceInsights = [
     "tag": "Global Outsourcing",
     "title": "Global Outsourcing Solutions for Modern Business Growth",
     "description": "Expanding operations, managing growing workloads, and maintaining consistent business performance require more than just additional manpower. Modern businesses need scalable outsourcing solutions that...",
-    "image": "/reference/finovate-root/images/36-GettyImages-1824276392-148538d4.webp",
+    "image": "/assets/closing-gap/service-global-outsourcing.webp",
     "featured": false,
     "sections": [
       "Expanding operations, managing growing workloads, and maintaining consistent business performance require more than just additional manpower. Modern businesses need scalable outsourcing solutions that improve efficiency, reduce operational pressure, and support long-term growth without increasing unnecessary complexity.",
@@ -477,7 +477,7 @@ export const importedServiceInsights = [
     "tag": "Development & Testing",
     "title": "Development & Testing Solutions for Modern Digital Growth",
     "description": "Building digital products requires more than just writing code. Businesses today need scalable development, reliable testing, secure infrastructure, and smooth product delivery that supports long-term...",
-    "image": "/reference/finovate/images/39-GettyImages-1498516652-82bfda7c.jpg",
+    "image": "/assets/closing-gap/service-development-testing.webp",
     "featured": false,
     "sections": [
       "Building digital products requires more than just writing code. Businesses today need scalable development, reliable testing, secure infrastructure, and smooth product delivery that supports long-term growth and performance. Our Development & Testing services are designed to help companies build, launch, and maintain high-quality digital solutions with better speed, stability, and confidence.",
@@ -708,7 +708,7 @@ export const importedServiceInsights = [
     "tag": "Digital Marketing",
     "title": "Digital Marketing Solutions for Modern Business Growth",
     "description": "In today’s digital world, visibility is everything. Businesses need more than just an online presence — they need strong brand positioning, consistent audience engagement, data-driven marketing strategies,...",
-    "image": "/reference/finovate-root/images/37-GettyImages-2162109308-3f385f13.webp",
+    "image": "/assets/closing-gap/service-digital-marketing.webp",
     "featured": false,
     "sections": [
       "In today’s digital world, visibility is everything. Businesses need more than just an online presence — they need strong brand positioning, consistent audience engagement, data-driven marketing strategies, and digital campaigns that create measurable business growth.",
@@ -962,7 +962,7 @@ export const importedServiceInsights = [
     "tag": "Business Automation",
     "title": "Business Automation Solutions for Smarter Operations",
     "description": "Modern businesses grow faster when operations run efficiently. Repetitive manual tasks, disconnected workflows, delayed approvals, and inefficient systems can slow down productivity and increase operational...",
-    "image": "/reference/finovate-root/images/33-GettyImages-1294412622-1jpg-3fe9c57f.webp",
+    "image": "/assets/closing-gap/service-business-automation.webp",
     "featured": false,
     "sections": [
       "Modern businesses grow faster when operations run efficiently. Repetitive manual tasks, disconnected workflows, delayed approvals, and inefficient systems can slow down productivity and increase operational pressure. Our Business Automation solutions help organizations simplify processes, improve efficiency, reduce manual workload, and create smarter operational systems that support long-term business growth.",
@@ -1200,7 +1200,7 @@ export const importedServiceInsights = [
     "tag": "Personal Branding",
     "title": "Personal Branding Solutions for Modern Professionals & Businesses",
     "description": "In today’s digital world, people connect with people before they connect with businesses. A strong personal brand helps professionals, founders, executives, creators, and business leaders build trust,...",
-    "image": "/reference/finovate/images/38-GettyImages-1313460596-8bdc7ab8.webp",
+    "image": "/assets/closing-gap/service-personal-branding.webp",
     "featured": false,
     "sections": [
       "In today’s digital world, people connect with people before they connect with businesses. A strong personal brand helps professionals, founders, executives, creators, and business leaders build trust, improve visibility, and create meaningful professional opportunities.",
@@ -1438,7 +1438,7 @@ export const importedServiceInsights = [
     "tag": "Startup & SMB",
     "title": "Startup & SMB Solutions for Sustainable Business Growth",
     "description": "Startups and small businesses move fast, adapt quickly, and constantly manage multiple priorities at once. From building operations and managing teams to scaling marketing, improving systems, and handling...",
-    "image": "/reference/finovate/images/32-GettyImages-1394467242-3d8aa6ea.webp",
+    "image": "/assets/closing-gap/service-startup-smb.webp",
     "featured": false,
     "sections": [
       "Startups and small businesses move fast, adapt quickly, and constantly manage multiple priorities at once. From building operations and managing teams to scaling marketing, improving systems, and handling growth challenges, businesses need practical support that helps them grow without unnecessary complexity.",
@@ -1677,7 +1677,7 @@ export const importedServiceInsights = [
     "tag": "Technology Solutions",
     "title": "Technology Solutions for Modern Business Transformation",
     "description": "Technology is no longer just a support function for businesses. It has become the foundation for growth, scalability, efficiency, and innovation. Modern businesses need reliable technology systems that...",
-    "image": "/reference/finovate/images/40-GettyImages-2161896288-d74dbb85.webp",
+    "image": "/assets/closing-gap/service-technology-solutions.webp",
     "featured": false,
     "sections": [
       "Technology is no longer just a support function for businesses. It has become the foundation for growth, scalability, efficiency, and innovation. Modern businesses need reliable technology systems that improve operations, strengthen digital infrastructure, support decision-making, and create better customer experiences.",
@@ -1931,7 +1931,7 @@ export const importedServiceInsights = [
     "tag": "Training & Upskilling",
     "title": "Training & Upskilling Solutions for Workforce Growth",
     "description": "In a fast-changing business environment, continuous learning has become essential for both individuals and organizations. Businesses need teams that can adapt quickly, improve skills consistently, and stay...",
-    "image": "/reference/finovate/images/36-pexels-rdne-7821936-427b1cbc.webp",
+    "image": "/assets/closing-gap/service-training-upskilling.webp",
     "featured": false,
     "sections": [
       "In a fast-changing business environment, continuous learning has become essential for both individuals and organizations. Businesses need teams that can adapt quickly, improve skills consistently, and stay aligned with evolving industry demands. Our Training & Upskilling services are designed to help organizations build stronger, smarter, and future-ready teams through structured learning and professional development solutions.",
@@ -2168,7 +2168,7 @@ export const importedServiceInsights = [
     "tag": "Business Consulting",
     "title": "Business Consulting Solutions for Strategic Growth",
     "description": "Every successful business needs more than day-to-day operations. Sustainable growth requires clear strategies, structured decision-making, operational efficiency, and the ability to adapt to changing market...",
-    "image": "/reference/finovate/images/29-GettyImages-2149615639-769b94a3.jpg",
+    "image": "/assets/closing-gap/service-business-consulting.webp",
     "featured": true,
     "sections": [
       "Every successful business needs more than day-to-day operations. Sustainable growth requires clear strategies, structured decision-making, operational efficiency, and the ability to adapt to changing market demands. Our Business Consulting services are designed to help organizations improve performance, solve operational challenges, strengthen business strategies, and create scalable systems that support long-term success.",
