@@ -36,6 +36,8 @@ const siteUrl = 'https://theclosinggap.net'
 const siteName = 'Closing Gap'
 const defaultSeoDescription =
   'Closing Gap provides 360 degree business solutions across hiring, outsourcing, technology, automation, digital marketing, consulting, and workforce growth.'
+const defaultSeoKeywords =
+  'Closing Gap, 360 degree business solutions, global outsourcing, hiring and staffing, business automation, digital marketing, technology solutions, business consulting, training and upskilling, startup SMB services'
 
 const images = {
   brandLogo: `${imageBase}brand-logo.webp`,
@@ -63,6 +65,11 @@ const images = {
   teamTalent: `${imageBase}team-talent-desk.webp`,
   teamAutomation: `${imageBase}team-automation-lab.webp`,
   teamGrowth: `${imageBase}team-growth-studio.webp`,
+  teamNaveen: `${imageBase}team-naveen-abraham.webp`,
+  teamHannah: `${imageBase}team-hannah-justus.webp`,
+  teamKingston: `${imageBase}team-kingston-robert.webp`,
+  teamSruthi: `${imageBase}team-sruthi-s.webp`,
+  teamAadithya: `${imageBase}team-aadithya-r.webp`,
   clientRukCabs: `${imageBase}client-ruk-cabs.webp`,
   clientSarensNass: `${imageBase}client-sarens-nass.webp`,
   clientGoalFoc: '/assets/partner-goalfoc.png',
@@ -376,10 +383,11 @@ const faqs = [
 ]
 
 const teamMembers = [
-  { name: 'Delivery Strategy', role: 'Consulting & Operations', image: images.teamDelivery },
-  { name: 'Talent Desk', role: 'Hiring & Staffing', image: images.teamTalent },
-  { name: 'Automation Lab', role: 'Systems & Workflow', image: images.teamAutomation },
-  { name: 'Growth Studio', role: 'Marketing & Branding', image: images.teamGrowth },
+  { name: 'Naveen Abraham', role: 'Director', image: images.teamNaveen },
+  { name: 'Hannah Justus', role: 'Operations Manager', image: images.teamHannah },
+  { name: 'Kingston Robert', role: 'Technology Lead', image: images.teamKingston },
+  { name: 'Sruthi S', role: 'People Operations Executive', image: images.teamSruthi },
+  { name: 'Aadithya R', role: 'People Operations Executive', image: images.teamAadithya },
 ]
 
 const emptyBlogDraft: BlogDraft = {
@@ -814,41 +822,149 @@ function summarizeForSearch(value: string, limit = 160) {
   return `${value.slice(0, limit - 3).replace(/\s+\S*$/, '')}...`
 }
 
+type SeoDetails = {
+  title: string
+  description: string
+  keywords: string
+  image: string
+  type: 'website' | 'article'
+}
+
 function getStaticPageSeo(activePage: PageKey) {
-  const pages: Record<string, { title: string; description: string }> = {
+  const pages: Record<string, { title: string; description: string; keywords: string }> = {
     home: {
       title: '360 Degree Business Solutions | Closing Gap',
       description: defaultSeoDescription,
+      keywords: defaultSeoKeywords,
     },
     services: {
       title: '360 Degree Business Solutions & Services | Closing Gap',
       description:
-        'Explore connected business solutions across global outsourcing, hiring, development, testing, digital marketing, automation, technology, consulting, and training.',
+        'Explore connected solutions across outsourcing, hiring, development, testing, digital marketing, automation, technology, consulting, and training.',
+      keywords:
+        '360 degree business services, outsourcing services, hiring and staffing services, business automation services, digital marketing services, development testing services, Closing Gap services',
     },
     about: {
       title: 'About Closing Gap | 360 Degree Business Solutions',
       description:
         'Learn how Closing Gap helps ambitious businesses close execution gaps across talent, technology, operations, marketing, and growth.',
+      keywords:
+        'about Closing Gap, 360 business solutions company, execution gap solutions, business growth partner, global talent technology operations marketing',
     },
     team: {
       title: 'Closing Gap Team | Business Growth Specialists',
       description:
-        'Meet the Closing Gap specialists supporting strategy, staffing, outsourcing, marketing, automation, technology, and delivery.',
+        'Meet Naveen Abraham, Hannah Justus, Kingston Robert, Sruthi S, Aadithya R, and the Closing Gap team supporting operations, technology, and people growth.',
+      keywords:
+        'Closing Gap team, Naveen Abraham Director, Hannah Justus Operations Manager, Kingston Robert Technology Lead, Sruthi S People Operations Executive, Aadithya R People Operations Executive',
     },
     insights: {
       title: 'Business Growth Insights | Closing Gap',
       description:
         'Read practical guides on hiring, global outsourcing, development, testing, marketing, automation, technology, training, and business consulting.',
+      keywords:
+        'business growth insights, hiring insights, outsourcing insights, automation insights, digital marketing articles, technology solutions blog, Closing Gap blog',
+    },
+    'case-studies': {
+      title: 'Business Case Studies | Closing Gap',
+      description:
+        'Explore Closing Gap case studies across outsourcing, automation, digital marketing, hiring, operations, and 360 degree business execution.',
+      keywords:
+        'Closing Gap case studies, business automation case study, outsourcing case study, digital growth case study, hiring case study',
+    },
+    'our-works': {
+      title: 'Our Works | Closing Gap 360 Degree Business Solutions',
+      description:
+        'See selected work across CRM automation, hiring funnels, growth websites, delivery governance, marketing, operations, and technology systems.',
+      keywords:
+        'Closing Gap work, CRM automation, hiring funnel redesign, growth website refresh, delivery governance, business systems portfolio',
+    },
+    industries: {
+      title: 'Industries Served | Closing Gap',
+      description:
+        'Closing Gap supports industries including technology, startups, professional services, healthcare, retail, education, logistics, finance, and real estate.',
+      keywords:
+        'industries served, technology business support, startup business support, healthcare marketing automation, retail business solutions, finance outsourcing support',
+    },
+    ebooks: {
+      title: 'Business Growth Ebooks | Closing Gap',
+      description:
+        'Access practical planning guides for outsourcing setup, automation planning, hiring, marketing, operations, and connected 360 degree growth systems.',
+      keywords:
+        'business growth ebooks, outsourcing checklist, automation planning workbook, Closing Gap guides, 360 growth resources',
     },
     faqs: {
       title: 'Frequently Asked Questions | Closing Gap',
       description:
         'Get clear answers about Closing Gap services, hiring timelines, automation, personal branding, development quality, and startup support.',
+      keywords:
+        'Closing Gap FAQs, hiring staffing questions, business automation questions, outsourcing FAQ, digital marketing FAQ, development testing FAQ',
     },
     contact: {
       title: 'Contact Closing Gap | Book a Free Consultation',
       description:
         'Talk to Closing Gap about hiring, outsourcing, digital growth, automation, technology, consulting, training, or connected 360 degree business support.',
+      keywords:
+        'contact Closing Gap, book free consultation, business growth consultation, hiring support contact, automation consultation, outsourcing consultation',
+    },
+    'clients-partners': {
+      title: 'Clients & Partners | Closing Gap',
+      description:
+        'View Closing Gap clients, partner relationships, certifications, and trusted delivery credentials across business growth and execution support.',
+      keywords:
+        'Closing Gap clients, Closing Gap partners, business partner network, IAF certification, Kerala Startup Mission, DPIIT recognition',
+    },
+    careers: {
+      title: 'Careers at Closing Gap | Join Our 360 Degree Team',
+      description:
+        'Explore career opportunities with Closing Gap across operations, technology, marketing, talent, automation, and client delivery roles.',
+      keywords:
+        'Closing Gap careers, operations jobs Closing Gap, technology jobs Closing Gap, marketing jobs Closing Gap, talent operations careers',
+    },
+    csr: {
+      title: 'Corporate Social Responsibility | Closing Gap',
+      description:
+        'Learn how Closing Gap approaches CSR through skill access, community support, responsible operations, and opportunity creation.',
+      keywords:
+        'Closing Gap CSR, corporate social responsibility, skill access, community support, responsible business growth',
+    },
+    esg: {
+      title: 'ESG | Closing Gap Responsible Business Operations',
+      description:
+        'Read about Closing Gap ESG priorities across environmental responsibility, social impact, governance, accountability, and long-term trust.',
+      keywords:
+        'Closing Gap ESG, environmental social governance, responsible business operations, governance, sustainable growth',
+    },
+    privacy: {
+      title: 'Privacy Policy | Closing Gap',
+      description:
+        'Review how Closing Gap handles website inquiries, contact information, analytics data, communication preferences, and privacy requests.',
+      keywords:
+        'Closing Gap privacy policy, data protection, website privacy, contact form privacy, business website privacy policy',
+    },
+    terms: {
+      title: 'Terms & Conditions | Closing Gap',
+      description:
+        'Review the website terms, service information, intellectual property notes, and usage conditions for Closing Gap.',
+      keywords:
+        'Closing Gap terms and conditions, website terms, service terms, intellectual property, business website terms',
+    },
+    'cookie-policy': {
+      title: 'Cookie Policy | Closing Gap',
+      description:
+        'Understand how Closing Gap may use essential, analytics, and marketing cookies to support website functionality and performance.',
+      keywords:
+        'Closing Gap cookie policy, website cookies, analytics cookies, marketing cookies, cookie preferences',
+    },
+    admin: {
+      title: 'Admin CMS | Closing Gap',
+      description: 'Private Closing Gap admin area for managing site content and insights.',
+      keywords: 'Closing Gap admin',
+    },
+    'not-found': {
+      title: 'Page Not Found | Closing Gap',
+      description: 'The requested Closing Gap page could not be found. Return to the home page or explore our 360 degree business solutions.',
+      keywords: 'Closing Gap page not found',
     },
   }
 
@@ -861,11 +977,12 @@ function getStaticPageSeo(activePage: PageKey) {
         .map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1)}`)
         .join(' ')} | Closing Gap`,
       description: defaultSeoDescription,
+      keywords: defaultSeoKeywords,
     }
   )
 }
 
-function getSeoDetails(activePage: PageKey, insights: BlogPost[]) {
+function getSeoDetails(activePage: PageKey, insights: BlogPost[]): SeoDetails {
   const article = insights.find((item) => insightPath(item) === activePage)
   const service = coreServices.find((item) => servicePath(item) === activePage)
   const caseStudy = caseStudies.find((item) => caseStudyPath(item) === activePage)
@@ -875,6 +992,7 @@ function getSeoDetails(activePage: PageKey, insights: BlogPost[]) {
     return {
       title: `${article.title} | Closing Gap`,
       description: summarizeForSearch(article.description),
+      keywords: `${article.tag}, ${article.title}, Closing Gap insights, ${defaultSeoKeywords}`,
       image: article.image,
       type: 'article',
     }
@@ -884,6 +1002,7 @@ function getSeoDetails(activePage: PageKey, insights: BlogPost[]) {
     return {
       title: `${service.title} Solutions | Closing Gap`,
       description: summarizeForSearch(service.detail),
+      keywords: `${service.title} solutions, ${service.bullets.join(', ')}, ${service.outcomes.join(', ')}, Closing Gap services`,
       image: service.image,
       type: 'website',
     }
@@ -893,6 +1012,7 @@ function getSeoDetails(activePage: PageKey, insights: BlogPost[]) {
     return {
       title: `${caseStudy.title} | Closing Gap Case Study`,
       description: summarizeForSearch(caseStudy.description),
+      keywords: `${caseStudy.title}, Closing Gap case study, ${caseStudy.metric}, business growth results`,
       image: caseStudy.image,
       type: 'article',
     }
@@ -918,6 +1038,7 @@ function upsertMeta(attribute: 'name' | 'property', key: string, content: string
 function buildStructuredData(activePage: PageKey, insights: BlogPost[]) {
   const article = insights.find((item) => insightPath(item) === activePage)
   const service = coreServices.find((item) => servicePath(item) === activePage)
+  const seo = getSeoDetails(activePage, insights)
   const canonicalUrl = `${siteUrl}${pageHref(activePage)}`
   const schemas: Record<string, unknown>[] = [
     {
@@ -948,15 +1069,65 @@ function buildStructuredData(activePage: PageKey, insights: BlogPost[]) {
         },
       ],
     },
-  ]
-
-  if (activePage === 'home') {
-    schemas.push({
+    {
       '@type': 'WebSite',
       '@id': `${siteUrl}/#website`,
       url: siteUrl,
       name: siteName,
+      description: defaultSeoDescription,
+      inLanguage: 'en',
       publisher: { '@id': `${siteUrl}/#organization` },
+    },
+    {
+      '@type': activePage === 'contact' ? 'ContactPage' : 'WebPage',
+      '@id': `${canonicalUrl}#webpage`,
+      url: canonicalUrl,
+      name: seo.title,
+      description: seo.description,
+      inLanguage: 'en',
+      isPartOf: { '@id': `${siteUrl}/#website` },
+      about: { '@id': `${siteUrl}/#organization` },
+      publisher: { '@id': `${siteUrl}/#organization` },
+      primaryImageOfPage: {
+        '@type': 'ImageObject',
+        url: toAbsoluteUrl(seo.image),
+      },
+    },
+  ]
+
+  if (activePage === 'services') {
+    schemas.push({
+      '@type': 'OfferCatalog',
+      name: 'Closing Gap 360 Degree Business Solutions',
+      url: canonicalUrl,
+      itemListElement: coreServices.map((item) => ({
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Service',
+          name: `${item.title} Solutions`,
+          description: item.detail,
+          url: `${siteUrl}${pageHref(servicePath(item))}`,
+          provider: { '@id': `${siteUrl}/#organization` },
+        },
+      })),
+    })
+  }
+
+  if (activePage === 'team') {
+    schemas.push({
+      '@type': 'ItemList',
+      name: 'Closing Gap Team',
+      itemListElement: teamMembers.map((member, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        item: {
+          '@type': 'Person',
+          name: member.name,
+          jobTitle: member.role,
+          image: toAbsoluteUrl(member.image),
+          worksFor: { '@id': `${siteUrl}/#organization` },
+        },
+      })),
     })
   }
 
@@ -1015,17 +1186,29 @@ function SeoHead({ activePage, insights }: { activePage: PageKey; insights: Blog
 
     document.title = seo.title
     upsertMeta('name', 'description', seo.description)
+    upsertMeta('name', 'keywords', seo.keywords)
+    upsertMeta('name', 'author', siteName)
     upsertMeta('name', 'robots', shouldIndex ? 'index, follow, max-image-preview:large' : 'noindex, nofollow')
+    upsertMeta(
+      'name',
+      'googlebot',
+      shouldIndex ? 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1' : 'noindex, nofollow',
+    )
+    upsertMeta('name', 'application-name', siteName)
     upsertMeta('property', 'og:site_name', siteName)
+    upsertMeta('property', 'og:locale', 'en_GB')
     upsertMeta('property', 'og:title', seo.title)
     upsertMeta('property', 'og:description', seo.description)
     upsertMeta('property', 'og:type', seo.type)
     upsertMeta('property', 'og:url', canonicalUrl)
     upsertMeta('property', 'og:image', toAbsoluteUrl(seo.image))
+    upsertMeta('property', 'og:image:alt', `${seo.title} visual`)
     upsertMeta('name', 'twitter:card', 'summary_large_image')
+    upsertMeta('name', 'twitter:site', '@theclosinggap')
     upsertMeta('name', 'twitter:title', seo.title)
     upsertMeta('name', 'twitter:description', seo.description)
     upsertMeta('name', 'twitter:image', toAbsoluteUrl(seo.image))
+    upsertMeta('name', 'twitter:image:alt', `${seo.title} visual`)
 
     let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]')
     if (!canonical) {
@@ -1683,7 +1866,7 @@ function TeamCards() {
     <div className="team-grid">
       {teamMembers.map((member) => (
         <article className="team-card" key={member.name}>
-          <img src={member.image} alt="" />
+          <img src={member.image} alt={`${member.name}, ${member.role} at Closing Gap`} />
           <div>
             <strong>{member.name}</strong>
             <span>{member.role}</span>

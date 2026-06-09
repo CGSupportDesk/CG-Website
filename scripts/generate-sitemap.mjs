@@ -68,7 +68,52 @@ const paths = [
   ...insights.map((article) => `insights/${slugify(article)}`),
   ...caseStudies.map((caseStudy) => `case-studies/${slugify(caseStudy)}`),
 ]
-const urls = paths.map((path) => `  <url><loc>${siteUrl}/${path}</loc></url>`).join('\n')
+
+function urlForPath(path) {
+  return path ? `${siteUrl}/${path}` : `${siteUrl}/`
+}
+
+function priorityForPath(path) {
+  if (!path) {
+    return '1.0'
+  }
+  if (path === 'services' || path === 'contact') {
+    return '0.9'
+  }
+  if (path.startsWith('services/') || path === 'insights' || path === 'about') {
+    return '0.8'
+  }
+  if (path.startsWith('insights/') || path.startsWith('case-studies/')) {
+    return '0.7'
+  }
+  return '0.6'
+}
+
+function changefreqForPath(path) {
+  if (!path || path === 'insights' || path.startsWith('insights/')) {
+    return 'weekly'
+  }
+  if (path === 'privacy' || path === 'terms' || path === 'cookie-policy') {
+    return 'yearly'
+  }
+  return 'monthly'
+}
+
+function indiaDate(value = new Date()) {
+  return new Date(value.getTime() + 330 * 60 * 1000).toISOString().slice(0, 10)
+}
+
+const lastmod = indiaDate()
+const urls = paths
+  .map(
+    (path) => `  <url>
+    <loc>${urlForPath(path)}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>${changefreqForPath(path)}</changefreq>
+    <priority>${priorityForPath(path)}</priority>
+  </url>`,
+  )
+  .join('\n')
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls}
