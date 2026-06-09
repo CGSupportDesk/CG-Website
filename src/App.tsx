@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ChangeEvent, Dispatch, FormEvent, MouseEvent as ReactMouseEvent, ReactNode, SetStateAction } from 'react'
 import { AnimatePresence, motion, useReducedMotion, useScroll } from 'framer-motion'
 import {
@@ -137,6 +137,8 @@ const contactFormSubject = 'New Closing Gap 360 Consultation Request'
 const contactSpamBlacklist = 'casino,betting,viagra,pharma,crypto,loan,forex,adult'
 const allowedUploadTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 const maxStoredImageSize = 1_600_000
+const introVideoSrc = `${imageBase}logo-opener.mp4`
+const introFallbackDelay = 11200
 
 const primaryNav: PageLink[] = [
   { key: 'home', label: 'Home' },
@@ -775,7 +777,23 @@ function shouldShowIntroLoader() {
     return false
   }
 
-  return window.sessionStorage.getItem(introLoaderStorageKey) !== 'seen'
+  try {
+    return window.sessionStorage.getItem(introLoaderStorageKey) !== 'seen'
+  } catch {
+    return true
+  }
+}
+
+function markIntroLoaderSeen() {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  try {
+    window.sessionStorage.setItem(introLoaderStorageKey, 'seen')
+  } catch {
+    // Storage can be unavailable in private, embedded, or restricted browser contexts.
+  }
 }
 
 function getContactNextUrl() {
@@ -1238,8 +1256,18 @@ function App() {
   const insights = useMemo(() => getInsights(customInsights), [customInsights])
   const [activePage, setActivePage] = useState<PageKey>(() => getRouteFromLocation(insights))
   const [showIntro, setShowIntro] = useState(() => shouldShowIntroLoader())
+  const introCompleteRef = useRef(false)
   const { scrollYProgress } = useScroll()
   const prefersReducedMotion = useReducedMotion()
+  const completeIntro = useCallback(() => {
+    if (introCompleteRef.current) {
+      return
+    }
+
+    introCompleteRef.current = true
+    markIntroLoaderSeen()
+    setShowIntro(false)
+  }, [])
 
   useEffect(() => {
     const syncRoute = () => {
@@ -1268,19 +1296,20 @@ function App() {
 
     const timer = window.setTimeout(
       () => {
-        window.sessionStorage.setItem(introLoaderStorageKey, 'seen')
-        setShowIntro(false)
+        completeIntro()
       },
-      prefersReducedMotion ? 700 : 2350,
+      prefersReducedMotion ? 500 : introFallbackDelay,
     )
 
     return () => window.clearTimeout(timer)
-  }, [prefersReducedMotion, showIntro])
+  }, [completeIntro, prefersReducedMotion, showIntro])
 
   return (
     <div className="site-shell" onClick={handleInternalNavigation}>
       <SeoHead activePage={activePage} insights={insights} />
-      <AnimatePresence>{showIntro ? <IntroLoader /> : null}</AnimatePresence>
+      <AnimatePresence>
+        {showIntro ? <IntroLoader onComplete={completeIntro} /> : null}
+      </AnimatePresence>
       <motion.div
         className="scroll-progress"
         style={{ scaleX: prefersReducedMotion ? 0 : scrollYProgress }}
@@ -1367,14 +1396,47 @@ function renderPage(
   }
 }
 
-function IntroLoader() {
+function IntroLoader({ onComplete }: { onComplete: () => void }) {
   const prefersReducedMotion = useReducedMotion()
-  const loaderLines = [
-    { width: '74%', start: -42 },
-    { width: '54%', start: 34 },
-    { width: '82%', start: -26 },
-    { width: '62%', start: 48 },
-  ]
+  const videoRef = useRef<HTMLVideoElement | null>(null)
+  const completeIntro = useCallback(() => {
+    onComplete()
+  }, [onComplete])
+  const completeWhenVideoFinishes = useCallback(
+    (video: HTMLVideoElement) => {
+      if (video.ended || (Number.isFinite(video.duration) && video.duration - video.currentTime < 0.2)) {
+        completeIntro()
+      }
+    },
+    [completeIntro],
+  )
+  const attachIntroVideo = useCallback(
+    (node: HTMLVideoElement | null) => {
+      videoRef.current = node
+      if (!node) {
+        return
+      }
+
+      node.muted = true
+      node.defaultMuted = true
+      if (node.dataset.introHandlersAttached === 'true') {
+        return
+      }
+      node.dataset.introHandlersAttached = 'true'
+
+      const requestPlayback = () => {
+        void node.play().catch(() => undefined)
+      }
+      const requestCompletion = () => completeWhenVideoFinishes(node)
+
+      node.addEventListener('canplay', requestPlayback)
+      node.addEventListener('timeupdate', requestCompletion)
+      node.addEventListener('pause', requestCompletion)
+      node.addEventListener('ended', completeIntro)
+      node.addEventListener('error', completeIntro)
+    },
+    [completeIntro, completeWhenVideoFinishes],
+  )
 
   return (
     <motion.div
@@ -1382,55 +1444,28 @@ function IntroLoader() {
       role="status"
       aria-label="Closing Gap 360 degree business solutions is loading"
       initial={prefersReducedMotion ? false : { opacity: 1 }}
-      exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, filter: 'blur(12px)' }}
-      transition={{ duration: prefersReducedMotion ? 0.18 : 0.46, ease: [0.22, 1, 0.36, 1] }}
+      exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 1.018, filter: 'blur(16px)' }}
+      transition={{ duration: prefersReducedMotion ? 0.18 : 0.62, ease: [0.22, 1, 0.36, 1] }}
     >
-      <div className="intro-loader-stage">
-        <motion.div
-          className="intro-loader-mark"
-          initial={prefersReducedMotion ? false : { scale: 0.94, opacity: 0 }}
-          animate={prefersReducedMotion ? undefined : { scale: 1, opacity: 1 }}
-          transition={{ duration: 0.44, ease: [0.22, 1, 0.36, 1] }}
-          aria-hidden="true"
-        >
-          <motion.span
-            className="intro-loader-ring"
-            initial={prefersReducedMotion ? false : { rotate: -16, scale: 0.86, opacity: 0 }}
-            animate={prefersReducedMotion ? undefined : { rotate: 0, scale: 1, opacity: 1 }}
-            transition={{ delay: 0.28, duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
-          />
-          <span className="intro-loader-lines">
-            {loaderLines.map((line, index) => (
-              <motion.span
-                key={`${line.width}-${line.start}`}
-                style={{ width: line.width }}
-                initial={prefersReducedMotion ? false : { x: line.start, opacity: 0, scaleX: 0.28 }}
-                animate={prefersReducedMotion ? undefined : { x: 0, opacity: 1, scaleX: 1 }}
-                transition={{
-                  delay: 0.26 + index * 0.12,
-                  duration: 0.56,
-                  ease: [0.22, 1, 0.36, 1],
-                }}
-              />
-            ))}
-          </span>
-          <motion.span
-            className="intro-loader-sweep"
-            initial={prefersReducedMotion ? false : { x: '-140%', opacity: 0 }}
-            animate={prefersReducedMotion ? undefined : { x: '140%', opacity: [0, 1, 0] }}
-            transition={{ delay: 0.92, duration: 0.82, ease: [0.22, 1, 0.36, 1] }}
-          />
-        </motion.div>
-        <motion.div
-          className="intro-loader-copy"
-          initial={prefersReducedMotion ? false : { y: 18, opacity: 0 }}
-          animate={prefersReducedMotion ? undefined : { y: 0, opacity: 1 }}
-          transition={{ delay: 1.08, duration: 0.46, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <strong>Closing Gap</strong>
-          <span>360° Business Solutions</span>
-        </motion.div>
-      </div>
+      <motion.div
+        className="intro-video-shell"
+        initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.985 }}
+        animate={prefersReducedMotion ? undefined : { opacity: 1, scale: 1 }}
+        transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <video
+          className="intro-video"
+          ref={attachIntroVideo}
+          src={introVideoSrc}
+          autoPlay
+          muted
+          playsInline
+          preload="auto"
+          disablePictureInPicture
+          controls={false}
+          aria-label="Closing Gap animated logo intro"
+        />
+      </motion.div>
     </motion.div>
   )
 }
